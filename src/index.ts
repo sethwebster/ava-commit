@@ -5,6 +5,7 @@ import consoleHelpers from './lib/consoleHelpers.js';
 import git from './lib/git.js';
 import { configure, loadConfig } from './lib/configure.js';
 import { combineSummaries, summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
+import cache from './lib/cache.js';
 
 //"gpt-3.5-turbo-16k"
 
@@ -67,11 +68,20 @@ async function main() {
   }
 
   try {
+    let summaries: string[];
+    let commitMessages: string[];
     await checkStagedCommits();
     const diffs = await git.diff();
-    const summaries = await summarizeDiffs(openAiKey, diffs);
-    const commitMessages = await summarizeSummaries(openAiKey, summaries);
-    
+    const previousSummaryRun = cache.getPreviousRun(diffs);
+    if (previousSummaryRun) {
+      console.log("Using previous summary run");
+      summaries = previousSummaryRun.summaries;
+      commitMessages = previousSummaryRun.commitMessages;
+    } else {
+      summaries = await summarizeDiffs(openAiKey, diffs);
+      commitMessages = await summarizeSummaries(openAiKey, summaries);
+      cache.storePreviousRun(diffs, summaries, commitMessages);
+    }
     let done = false;
     while (!done) {
       displayOptions(commitMessages);
@@ -86,6 +96,7 @@ async function main() {
           const acceptCombinedAnswer = await consoleHelpers.readline("Accept? (Y, n) > ");
           if (acceptCombinedAnswer.toLowerCase() === "y" || answer.trim().length === 0) {
             git.commit(resummarized);
+            cache.deletePreviousRun(diffs);
             done = true;
           }
 
@@ -103,10 +114,11 @@ async function main() {
             done = true;
             return;
           }
-          
+
           const commitMessage = commitMessages[parseInt(answer) - 1];
           console.log("Selected commit message: ", commitMessage)
           git.commit(commitMessage);
+          cache.deletePreviousRun(diffs);
           done = true;
           break;
         }

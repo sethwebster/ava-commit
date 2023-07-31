@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import Readline from 'readline';
+import { makeConfigPath } from './environment.js';
 
 const DEFAULT_CONFIG: Options = {
   openAIApiKey: undefined,
@@ -18,9 +19,6 @@ const welcomeMessages = [
 
 const welcomeMessage = welcomeMessages.join("\n");
 
-function makeConfigPath() {
-  return `${process.env.HOME}/.ava-commit/config.json`;
-}
 
 function createConfigPath() {
   const configPath = makeConfigPath();
