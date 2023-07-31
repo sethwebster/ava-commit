@@ -54,7 +54,9 @@ async function summarizeDiff(diff: string): Promise<string> {
     verbose: false,
   });
 
+  
   const summary = await chain.call({ diff });
+  process.stdout.write(".")
   return summary.text;
 }
 
@@ -62,6 +64,7 @@ async function summarizeDiffs(diffs: string[]) {
   console.log(`Summarizing ${chalk.bold(chalk.yellow(diffs.length))} diffs`);
   const summaryPromises = diffs.map(diff => summarizeDiff(diff));
   const summaries = await Promise.all(summaryPromises);
+  console.log();
   return summaries;
 }
 
@@ -91,7 +94,6 @@ async function summarizeSummaries(summaries: string[]) {
     verbose: false,
   });
   const mappedSummaries =  summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n")
-  console.log("Mapped", mappedSummaries)
   const summary = await chain.call({ summaries: mappedSummaries });
   return summary.text;
 }
@@ -114,7 +116,7 @@ async function main() {
       input: process.stdin,
       output: process.stdout,
     })
-    rl.question("Accept? (y/n)", (answer) => {
+    rl.question("Accept? (y/n) > ", (answer) => {
       if (answer.toLowerCase() === "y") {
         rl.close();
         exec(`git add . && git commit -m "${commitMessage}"`);
@@ -123,8 +125,6 @@ async function main() {
         rl.close();
       }
     })
-
-
   } catch (e) {
     console.error(e);
   }
