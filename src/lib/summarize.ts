@@ -49,7 +49,7 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  chalkAnimation.rainbow(`Ava is working...`);
+  chalkAnimation.rainbow(`Ava is working....`);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
@@ -63,8 +63,9 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     template: `These are summaries of ${summaries.length} diffs. 
       -- instructions -- 
       
-      Create 5 multi-line commit message options. The first line with have ${maxLen} characters or less for them, and no more than 5 bulleted lines will follow.
-      Do not omit any important information.
+      Create 2 multi-line commit message options. The first line with have ${maxLen} characters or less for them, and no more than 10 bulleted lines will follow.
+      
+      In creation of the options, do not split important information across the options. Each option should be inclusive of the changes made.
       
       Prioritze added code over changes to package lock files or package.json. Don't include any diffs that are just package lock changes.
       Don't include messages about adding imports.
