@@ -75,7 +75,7 @@ async function main() {
     let done = false;
     while (!done) {
       displayOptions(commitMessages);
-      const answer = await consoleHelpers.readline("Accept? (#, [n]one, [c]ombine) > ");
+      const answer = await consoleHelpers.readline("Accept which summary? (#, [n]one, [c]ombine) > ");
       switch (answer.toLowerCase()) {
         case "c": {
           const answer = await consoleHelpers.readline("Enter the numbers of the commit messages to combine, separated by spaces > ");
@@ -98,6 +98,12 @@ async function main() {
           return;
         }
         default: {
+          if (answer.length === 0) {
+            console.log(chalk.red("Aborting commit"));
+            done = true;
+            return;
+          }
+          
           const commitMessage = commitMessages[parseInt(answer) - 1];
           console.log("Selected commit message: ", commitMessage)
           git.commit(commitMessage);
