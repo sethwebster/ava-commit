@@ -63,13 +63,19 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     template: `These are summaries of ${summaries.length} diffs. 
       -- instructions -- 
       
-      Create 2 multi-line commit message options. The first line with have ${maxLen} characters or less for them, and no more than 10 bulleted lines will follow.
+      Purpose: 
+      Create 2 to 3 multi-line commit message options that combine the summaries provided. 
       
-      In creation of the options, do not split important information across the options. Each option should be inclusive of the changes made.
+      Commit Message Format: 
+      The first line with have ${maxLen} characters or less for them, and no more than 10 bulleted lines will follow. 
+      Each message will stand on its own as a complete commit message. Options should NOT span multiple options, and should each include all
+      important information.
       
+      Guiding Principles:
       Prioritze added code over changes to package lock files or package.json. Don't include any diffs that are just package lock changes.
       Don't include messages about adding imports.
 
+      Output Format:
       - Output each summary separated by "\n\n---\n\n" and do NOT include a heading at all like "Option 1" or "Option 2".
       - Include ONLY the commit message and no headings.
 

@@ -16,7 +16,8 @@ async function diff() {
   return new Promise<string[]>((resolve, reject) => {
     const branch = (currentBranch() ?? "HEAD").trim();
     const diffResult = spawn("git", ["diff", branch, "--staged"]) ?? "";
-    return resolve(diffResult.split("---"));
+    const splits = diffResult.split("diff --git");
+    return resolve(splits);
   });
 }
 
