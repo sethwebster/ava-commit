@@ -1,16 +1,25 @@
 {
-  "name": "aicommits-mine",
+  "name": "aicommitsv",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "aicommitsv": "./dist/index.js"
+  },
   "scripts": {
+    "dev": "npx tsc -w",
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "ai",
+    "gpt",
+    "git"
+  ],
+  "author": "Seth Webster",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^4.1.2",
     "commander": "^11.0.0",
     "figlet": "^1.6.0",
     "langchain": "^0.0.120"
