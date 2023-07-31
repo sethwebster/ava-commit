@@ -39,6 +39,12 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
   return summary.text;
 }
 
+/**
+ * Summarizes a set of summaries into a single summary
+ * @param openAiApiKey The OpenAI API key
+ * @param summaries The summaries to combine
+ * @returns A string combined from the LLM
+ */
 export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
   const rainbow = chalkAnimation.rainbow(`Ava is combining ${summaries.length} summaries...`);
   const model = new OpenAIChat({
@@ -116,6 +122,8 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
       Output Format:
       - Output each summary separated by "\n\n---\n\n" and do NOT include a heading at all like "Option 1" or "Option 2".
       - Include ONLY the commit message and no headings.
+
+      Special Note: If functionality has changed, but the version in the package.json hasn't changed, alert the user.
 
       -- input content --
       {summaries}
