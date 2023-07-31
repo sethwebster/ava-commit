@@ -7,7 +7,6 @@ import { options } from '../index.js';
 var chalkAnimation: { rainbow: (text: string) => void; } = { rainbow: (str) => { console.log(str) } };
 (async function () {
   chalkAnimation = (await import("chalk-animation")).default;
-  console.log(chalkAnimation);
 })();
 
 

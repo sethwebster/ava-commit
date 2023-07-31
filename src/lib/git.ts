@@ -33,7 +33,7 @@ async function commit(commitMessage: string) {
 
 function status(options?: { short?: boolean } | undefined): GitStatusEntry[] {
   const statusResult = spawn("git", ["status", options?.short ? "--short" : ""]);
-  if (!statusResult) throw new Error("No status result");
+  if (!statusResult) return [];
   const lines = statusResult.split("\n").filter(l => l.trim().length > 0);
   const entries = lines.map<GitStatusEntry>(l => {
     const parts = l.split(" ");
