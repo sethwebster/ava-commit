@@ -123,7 +123,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
       - Output each summary separated by "\n\n---\n\n" and do NOT include a heading at all like "Option 1" or "Option 2".
       - Include ONLY the commit message and no headings.
 
-      Special Note: If functionality has changed, but the version in the package.json hasn't changed, alert the user.
+      Special Note: If functionality has changed, but the version in the package.json hasn't changed, return a header on the options: [CHECK PACKAGE VERSION]
 
       -- input content --
       {summaries}
