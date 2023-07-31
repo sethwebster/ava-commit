@@ -25,7 +25,6 @@ export const options = program.opts();
 
 async function checkStagedCommits() {
   const status = git.status({ short: true });
-  console.log(status)
   if (status.length === 0) {
     console.log(chalk.red("No changes to commit"));
     return;
@@ -79,10 +78,7 @@ async function main() {
       } else {
         const commitMessage = commitMessages[parseInt(answer) - 1];
         console.log("Selected commit message: ", commitMessage)
-        const addResult = git.add();
-        console.log(addResult);
-        const commitResult = git.commit(commitMessage);
-        console.log(commitResult);
+        git.commit(commitMessage);
         rl.close();
       }
     })

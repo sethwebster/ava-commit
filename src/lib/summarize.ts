@@ -4,17 +4,21 @@ import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
 import { options } from '../index.js';
 
+const MODELS = {
+  "gpt35": "gpt-3.5-turbo-16k",
+  "gpt4": "gpt-4",
+}
+
 var chalkAnimation: { rainbow: (text: string) => void; } = { rainbow: (str) => { console.log(str) } };
 (async function () {
   chalkAnimation = (await import("chalk-animation")).default;
 })();
 
-
 async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string> {
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: "gpt-3.5-turbo-16k",
+    modelName: MODELS.gpt35,
     maxTokens: -1,
   });
 
@@ -45,12 +49,12 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  chalkAnimation.rainbow(`The Magic is happening...`);
+  chalkAnimation.rainbow(`Ava is working...`);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: "gpt-4",
+    modelName: MODELS.gpt4,
     maxTokens: -1,
   });
 
