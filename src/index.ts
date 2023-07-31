@@ -4,7 +4,7 @@ import Readline from 'readline';
 import consoleHelpers from './lib/consoleHelpers.js';
 import git from './lib/git.js';
 import { configure, loadConfig } from './lib/configure.js';
-import { summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
+import { combineSummaries, summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
 
 //"gpt-3.5-turbo-16k"
 
@@ -22,7 +22,7 @@ program.version('0.0.2')
 
 export const options = program.opts();
 
-async function checkStagedCommits() {  
+async function checkStagedCommits() {
   const status = git.status({ short: true });
   if (status.length === 0) {
     console.log(chalk.red("No changes to commit"));
@@ -31,11 +31,11 @@ async function checkStagedCommits() {
 
   if (options.all) {
     console.log(chalk.yellow("Staging all files..."));
-    git.add();    
+    git.add();
     return;
   }
 
-  if (status.filter(s => s.type === "unknown" || s.type==="modified-partly-staged").length > 0) {
+  if (status.filter(s => s.type === "unknown" || s.type === "modified-partly-staged").length > 0) {
     console.log(chalk.yellow("You have unstaged commits. Do you want to stage them before generating the commit messages?"));
     const answer = await consoleHelpers.readline("(Y, n) > ");
     if (answer.toLowerCase() === "y" || answer.trim().length === 0) {
@@ -43,6 +43,11 @@ async function checkStagedCommits() {
       git.add();
     }
   }
+}
+
+function displayOptions(options: string[]) {
+  const message = options.map((m, i) => `${chalk.bold(chalk.yellow(i + 1))}. ${m}`).join("\n");
+  console.log(`Commit message options:\n${message}`);
 }
 
 async function main() {
@@ -56,7 +61,6 @@ async function main() {
     return;
   }
 
-  console.log("")
   if (!hasApiKey || !openAiKey || openAiKey.length === 0) {
     console.error("You must set the OPENAI_API_KEY environment variable, or run `ava-commit --configure`");
     return;
@@ -67,27 +71,41 @@ async function main() {
     const diffs = await git.diff();
     const summaries = await summarizeDiffs(openAiKey, diffs);
     const commitMessages = await summarizeSummaries(openAiKey, summaries);
+    
+    let done = false;
+    while (!done) {
+      displayOptions(commitMessages);
+      const answer = await consoleHelpers.readline("Accept? (#, [n]one, [c]ombine) > ");
+      switch (answer.toLowerCase()) {
+        case "c": {
+          const answer = await consoleHelpers.readline("Enter the numbers of the commit messages to combine, separated by spaces > ");
+          const numbers = answer.split(" ").map(n => parseInt(n));
+          const combined = numbers.map(n => commitMessages[n - 1]);
+          const resummarized = await combineSummaries(openAiKey!, combined);
+          console.log("Combined commit message:\n", resummarized);
+          const acceptCombinedAnswer = await consoleHelpers.readline("Accept? (Y, n) > ");
+          if (acceptCombinedAnswer.toLowerCase() === "y" || answer.trim().length === 0) {
+            git.commit(resummarized);
+            done = true;
+          }
 
-    const message = commitMessages.map((m, i) => `${chalk.bold(chalk.yellow(i + 1))}. ${m}`).join("\n");
-    console.log(`Commit message options:\n${message}`);
-    // Ask the user to Accept
-
-    const rl = Readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-    rl.question("Accept? (#, [n]one) > ", (answer) => {
-      if (answer.toLowerCase() === "n" || answer.trim().length === 0) {
-        rl.close();
-        console.log(chalk.red("Aborting commit"));
-        return;
-      } else {
-        const commitMessage = commitMessages[parseInt(answer) - 1];
-        console.log("Selected commit message: ", commitMessage)
-        git.commit(commitMessage);
-        rl.close();
+          break;
+        }
+        case "n": {
+          // None
+          console.log(chalk.red("Aborting commit"));
+          done = true;
+          return;
+        }
+        default: {
+          const commitMessage = commitMessages[parseInt(answer) - 1];
+          console.log("Selected commit message: ", commitMessage)
+          git.commit(commitMessage);
+          done = true;
+          break;
+        }
       }
-    })
+    }
   } catch (e) {
     console.error(e);
   }

@@ -38,24 +38,52 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
   return summary.text;
 }
 
+export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
+  const model = new OpenAIChat({
+    temperature: 0,
+    openAIApiKey: openAiApiKey,
+    modelName: MODELS.gpt4,
+    maxTokens: -1,
+  });
+
+  const template = new PromptTemplate({
+    inputVariables: ["summaries"],
+    template: "Combine the following summaries into a single summary. It should have a first line (no more than 100 chars) overall summary followed by bullets that expand on the summary. Do not remove any important information:\n\n{summaries}\n\nSummary:",
+  });
+
+  const chain = new LLMChain({
+    llm: model,
+    prompt: template,
+    verbose: false,
+  });
+
+  const summary = await chain.call({ summaries: summaries.join("\n\n---\n\n") });
+  process.stdout.write(".");
+  return summary.text;
+}
+
+
 export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
   const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
-  console.log(`Summarizing ${chalk.bold(chalk.yellow(filtered.length))} diffs`);
+  process.stdout.write(`Summarizing ${chalk.bold(chalk.yellow(filtered.length))} diffs`);
   const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff));
   const summaries = await Promise.all(summaryPromises);
-  console.log();
+  process.stdout.cursorTo(0);
+  process.stdout.clearLine(0);
+  console.log(`Summarized ${chalk.bold(chalk.yellow(filtered.length))} diffs`);
   return summaries;
 }
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  chalkAnimation.rainbow(`Ava is working....`);
+  chalkAnimation.rainbow(`Ava is working...`);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
     modelName: MODELS.gpt4,
     maxTokens: -1,
+    streaming: true,
   });
 
   const template = new PromptTemplate({
@@ -100,7 +128,15 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     verbose: false,
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
-  const summary = await chain.call({ summaries: mappedSummaries }) as { text: string; };
+  let summaryText = "";
+  const summary = await chain.call({ summaries: mappedSummaries }, [
+    {
+      handleLLMNewToken: (token) => {
+        summaryText += token;
+        process.stdout.write(summaryText);
+      }
+    }
+  ]) as { text: string; };
   const lines = summary.text.split("---").map(s => s.trim()).filter(s => s.length > 0);
   return lines;
 }
