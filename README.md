@@ -9,7 +9,7 @@ Using AI to write your commit messages. It's like having an AI pair programmer a
 ## Installation
 
 ```bash
-npm install ava-commit
+npm install @sethwebster/ava-commit
 ```
 
 ## Usage
