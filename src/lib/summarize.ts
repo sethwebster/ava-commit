@@ -69,8 +69,10 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
       
       Prioritze added code over changes to package lock files or package.json. Don't include any diffs that are just package lock changes.
       Don't include messages about adding imports.
-      Output each summary separated by "\n\n---\n\n"
 
+      - Output each summary separated by "\n\n---\n\n"
+      - Include ONLY the commit message and no headings.
+      
       -- input content --
       {summaries}
       

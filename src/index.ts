@@ -1,4 +1,3 @@
-import { exec } from 'child_process';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import Readline from 'readline';
@@ -23,12 +22,19 @@ program.version('0.0.1')
 
 export const options = program.opts();
 
-async function checkStagedCommits() {
+async function checkStagedCommits() {  
   const status = git.status({ short: true });
   if (status.length === 0) {
     console.log(chalk.red("No changes to commit"));
     return;
   }
+
+  if (options.all) {
+    console.log(chalk.yellow("Staging all files..."));
+    git.add();    
+    return;
+  }
+  
   if (status.filter(s => s.type === "unknown" || s.type==="modified-partly-staged").length > 0) {
     console.log(chalk.yellow("You have unstaged commits. Do you want to stage them before generating the commit messages?"));
     const answer = await consoleHelpers.readline("(Y, n) > ");
