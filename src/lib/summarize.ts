@@ -3,13 +3,14 @@ import { PromptTemplate } from 'langchain/prompts';
 import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
 import { options } from '../index.js';
+import { Animation } from 'chalk-animation';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
   "gpt4": "gpt-4",
 }
 
-var chalkAnimation: { rainbow: (text: string) => void; } = { rainbow: (str) => { console.log(str) } };
+var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
   chalkAnimation = (await import("chalk-animation")).default;
 })();
@@ -39,6 +40,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
 }
 
 export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
+  console.log(`Combining ${chalk.bold(chalk.yellow(summaries.length))} summaries...`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
@@ -76,7 +78,7 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  chalkAnimation.rainbow(`Ava is working...`);
+  const rainbow = chalkAnimation.rainbow(`Ava is working...`);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
@@ -133,7 +135,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
-        process.stdout.write(summaryText);
+        (rainbow as Animation).replace(`Ava is working... ${summaryText.length} characters`);
       }
     }
   ]) as { text: string; };

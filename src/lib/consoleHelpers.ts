@@ -8,7 +8,7 @@ async function readline(question: string) {
     rl.question(question, (answer) => {
       rl.close();
       resolve(answer);
-    });
+    })
   });
 }
 
