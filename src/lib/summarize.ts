@@ -40,12 +40,13 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
 }
 
 export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
-  console.log(`Combining ${chalk.bold(chalk.yellow(summaries.length))} summaries...`);
+  const rainbow = chalkAnimation.rainbow(`Ava is combining ${summaries.length} summaries...`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
     modelName: MODELS.gpt4,
     maxTokens: -1,
+    streaming: true,
   });
 
   const template = new PromptTemplate({
@@ -59,8 +60,15 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
     verbose: false,
   });
 
-  const summary = await chain.call({ summaries: summaries.join("\n\n---\n\n") });
-  process.stdout.write(".");
+  let summaryText = "";
+
+  const summary = await chain.call({ summaries: summaries.join("\n\n---\n\n") }, [{
+    handleLLMNewToken: (token) => {
+      summaryText += token;
+      (rainbow as Animation).replace(`Ava is combining ${summaries.length} summaries... ${summaryText.length} characters`);
+    }
+  }]);
+  console.log();
   return summary.text;
 }
 
