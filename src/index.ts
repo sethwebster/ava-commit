@@ -1,3 +1,4 @@
+#!/usr/bin/env npx ts-node --esm
 import { exec } from 'child_process';
 import { Command } from 'commander';
 import { LLMChain } from 'langchain/chains';
