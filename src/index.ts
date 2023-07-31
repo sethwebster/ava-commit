@@ -10,7 +10,7 @@ import { summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
 
 const program = new Command();
 
-program.version('0.0.1')
+program.version('0.0.2')
   .description("Use AI to write your commit messages")
   .option("-a,--all", "All commits, not just staged", false)
   .option('-v,--verbose', 'Verbose output', false)
