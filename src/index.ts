@@ -2,11 +2,10 @@ import { exec } from 'child_process';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import Readline from 'readline';
-import { configure, loadConfig } from './lib/configure';
-import { spawn } from './lib/spawn';
-import { summarizeDiffs, summarizeSummaries } from './lib/summarize';
-import git from './lib/git';
-import consoleHelpers from './lib/consoleHelpers';
+import consoleHelpers from './lib/consoleHelpers.js';
+import git from './lib/git.js';
+import { configure, loadConfig } from './lib/configure.js';
+import { summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
 
 //"gpt-3.5-turbo-16k"
 

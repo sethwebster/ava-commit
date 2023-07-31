@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { spawn } from "./spawn";
+import { spawn } from "./spawn.js";
 
 type GitStatusType = "unknown" | "added" | "modified" | "modified-partly-staged" | "deleted";
 type GitStatusEntry = {

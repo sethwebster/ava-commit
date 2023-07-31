@@ -2,8 +2,13 @@ import { LLMChain } from 'langchain/chains';
 import { PromptTemplate } from 'langchain/prompts';
 import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
-import { options } from '..';
-import chalkAnimation from './chalkAnimation';
+import { options } from '../index.js';
+
+var chalkAnimation: { rainbow: (text: string) => void; } = { rainbow: (str) => { console.log(str) } };
+(async function () {
+  chalkAnimation = (await import("chalk-animation")).default;
+  console.log(chalkAnimation);
+})();
 
 
 async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string> {
@@ -41,7 +46,7 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  chalkAnimation.rainbow(`The ${chalk.bold(chalk.magenta('Magic'))} is happening...`);
+  chalkAnimation.rainbow(`The Magic is happening...`);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
