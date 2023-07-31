@@ -51,7 +51,7 @@ function displayOptions(options: string[]) {
   console.log(`Commit message options:\n${message}`);
 }
 
-async function main() {
+async function main(noCache?: boolean) {
   const existingConfig = loadConfig();
   const envOpenAiKey = process.env.OPENAI_API_KEY ?? undefined;
   let openAiKey = envOpenAiKey ?? existingConfig.openAIApiKey;
@@ -73,8 +73,8 @@ async function main() {
     await checkStagedCommits();
     const diffs = await git.diff();
     const previousSummaryRun = cache.getPreviousRun(diffs);
-    if (previousSummaryRun) {
-      console.log("Using previous summary run");
+    if (previousSummaryRun && !noCache) {
+      console.log(chalk.green("Using cached summaries and commit messages from previous run."));
       summaries = previousSummaryRun.summaries;
       commitMessages = previousSummaryRun.commitMessages;
     } else {
@@ -85,8 +85,12 @@ async function main() {
     let done = false;
     while (!done) {
       displayOptions(commitMessages);
-      const answer = await consoleHelpers.readline("Accept which summary? (#, [n]one, [c]ombine) > ");
+      const answer = await consoleHelpers.readline("Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) > ");
       switch (answer.toLowerCase()) {
+        case "r": {
+          main(true);
+          return;
+        }
         case "c": {
           const answer = await consoleHelpers.readline("Enter the numbers of the commit messages to combine, separated by spaces > ");
           const numbers = answer.split(" ").map(n => parseInt(n));
