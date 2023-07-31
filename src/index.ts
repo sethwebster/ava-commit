@@ -72,13 +72,12 @@ async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
 }
 
 async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
-  console.log(options);
   const maxLen = options.length ?? 150;
-  console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
+  // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: "gpt-3.5-turbo-16k",
+    modelName: "gpt-4",
     maxTokens: -1,
   });
 
@@ -154,7 +153,7 @@ async function main() {
       } else {
         const commitMessage = commitMessages[parseInt(answer) - 1];
         console.log("Selected commit message: ", commitMessage)
-        exec(`git add . && git commit -m "${commitMessage}"`, (err, stdout, stderr) => {
+        exec(`git add . && git commit -m ${commitMessage}`, (err, stdout, stderr) => {
           if (stdout.trim().length === 0) {
             console.log(chalk.green("Commit successful"));
           }
