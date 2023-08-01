@@ -4,11 +4,12 @@
     "outDir": "dist",
     "strict": true,
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "ESNext",
     "sourceMap": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "NodeNext",
-    "allowArbitraryExtensions": true
+    "allowArbitraryExtensions": true,
+    "resolveJsonModule": true
   }
 }

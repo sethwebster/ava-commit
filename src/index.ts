@@ -6,45 +6,30 @@ import git from './lib/git.js';
 import { configure, loadConfig } from './lib/configure.js';
 import { combineSummaries, summarizeDiffs, summarizeSummaries } from './lib/summarize.js';
 import cache from './lib/cache.js';
-
-//"gpt-3.5-turbo-16k"
+import checkStagedCommits from './lib/checkStagedCommits.js';
+import packageJson from './lib/packageJson.js';
 
 const program = new Command();
 
-program.version('0.0.2')
-  .description("Use AI to write your commit messages")
+program.version(packageJson.packageVersion())
+  .description("🤖 Use AI to write your commit messages")
+  .name("ava-commit")
+  .usage("[options]")
   .option("-a,--all", "All commits, not just staged", false)
   .option('-v,--verbose', 'Verbose output', false)
   .option<number>('-l,--length [number]', 'Length of commit message', (val, prev) => {
     return parseInt(val);
   }, 80)
   .option('--configure', 'Configure the tool')
+  .addHelpText('after', `\n`)
+  .addHelpText('after', `Examples:`)
+  .addHelpText('after', `  $ ava-commit --configure  # Start the configuration process`)
+  .addHelpText('after', `  $ ava-commit              # create a commit message for staged files with all defaults`)
+  .addHelpText('after', `  $ ava-commit --all        # create a commit message for staged files, bypassing the check for staged files`)
+  .addHelpText('after', `  $ ava-commit --length 150 # create a commit message for staged files, targeting max summary of 150 characters`)
   .parse(process.argv);
 
 export const options = program.opts();
-
-async function checkStagedCommits() {
-  const status = git.status({ short: true });
-  if (status.length === 0) {
-    console.log(chalk.red("No changes to commit"));
-    process.exit(1);
-  }
-
-  if (options.all) {
-    console.log(chalk.yellow("Staging all files..."));
-    git.add();
-    return;
-  }
-
-  if (status.filter(s => s.type === "unknown" || s.type === "modified-partly-staged").length > 0) {
-    console.log(chalk.yellow("You have unstaged commits. Do you want to stage them before generating the commit messages?"));
-    const answer = await consoleHelpers.readline("(Y, n) > ");
-    if (answer.toLowerCase() === "y" || answer.trim().length === 0) {
-      console.log("Staging all files...")
-      git.add();
-    }
-  }
-}
 
 function displayOptions(options: string[]) {
   const message = options.map((m, i) => `${chalk.bold(chalk.yellow(i + 1))}. ${m}`).join("\n");
