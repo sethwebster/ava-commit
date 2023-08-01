@@ -43,13 +43,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
     verbose: options.verbose,
   });
 
-  if (diff.length>=3000 && diff.length <= 4000) {
-    console.log("THE DIFF", diff.length, diff)
-  }
-  console.log(`Summarizing diff of ${diff.length} characters`)
-  const summaryPromise =  chain.call({ diff });
-  const summary = await summaryPromise;
-  console.log(`Summarized diff of ${diff.length} characters`)
+  const summary = await chain.call({ diff });
   process.stdout.write(".");
   return summary.text;
 }
@@ -97,16 +91,11 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
 export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
   const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
   process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
-  let summaries: string[] = [];
   const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff));
-  for (let promise of summaryPromises) {
-    const summary = await promise;
-    summaries.push(summary);
-    console.log("x");
-  }
+  const summaries = await Promise.all(summaryPromises);
   process.stdout.cursorTo(0);
   process.stdout.clearLine(0);
-  console.log(`${MessagesForCurrentLanguage.messages.summarized} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}}`);
+  console.log(`${MessagesForCurrentLanguage.messages.summarized} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
   return summaries;
 }
 
@@ -171,7 +160,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
-        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${summaryText.length} ${MessagesForCurrentLanguage.messages['characters']}}`);
+        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${summaryText.length} ${MessagesForCurrentLanguage.messages['characters']}`);
       }
     }
   ]) as { text: string; };

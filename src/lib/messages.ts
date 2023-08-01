@@ -1,18 +1,33 @@
 import { AvailableLanguages, LanguageLocales } from "./configure.js"
+import invariant from "./invariant.js";
 
-function getLanguage() {
+export function getLanguage() {
   //TODO: use config file to set language
   let locale = Intl.DateTimeFormat().resolvedOptions().locale ?? (process.env.LANG)?.split('.')[0];
   return locale as AvailableLanguages;
 }
 
+type CliPossibleAnswers = {
+  "yes"?: string;
+  "no"?: string;
+  "combine"?: string;
+  "regenerate"?: string;
+  "none"?: string;
+  "open-ended"?: string;
+}
+
+type CliPrompt = {
+  text: string;
+  answers?: CliPossibleAnswers;
+}
+
 type CliMessages = {
   prompts: {
-    "enter-openai-key": string;
-    "unstaged-commits-confirm-add": string;
-    "accept-which-summary": string;
-    "combine-summaries-selection": string;
-    "accept-yes-no": string;
+    "enter-openai-key": CliPrompt;
+    "unstaged-commits-confirm-add": CliPrompt;
+    "accept-which-summary": CliPrompt;
+    "combine-summaries-selection": CliPrompt;
+    "accept-yes-no": CliPrompt;
   },
   messages: {
     "staging-all-files": string;
@@ -42,14 +57,41 @@ type Messages = {
   [key in AvailableLanguages]: CliMessages | undefined;
 };
 
+const DEFAULT_CLI_POSSIBLE_ANSWERS: CliPossibleAnswers = {
+  "yes": "y",
+  "no": "n",
+  "combine": "c",
+  "regenerate": "r",
+  "none": "n",
+  "open-ended": "open-ended",
+}
+
+export function convertAnswerToDefault(prompt: CliPrompt, answer: string, defaultValue?: string): string {
+  const promptAnswers = prompt.answers ?? DEFAULT_CLI_POSSIBLE_ANSWERS;
+  const foundItem = Object.keys(promptAnswers).find(key => (promptAnswers as Record<string, string>)[key] === answer) as keyof CliPossibleAnswers;
+  const result = DEFAULT_CLI_POSSIBLE_ANSWERS[foundItem]
+  if (!result && defaultValue) {
+    return defaultValue;
+  }
+  invariant(result, `Could not find answer for ${answer} in ${JSON.stringify(promptAnswers)}, and no defaultValue was provided.`);
+  return result.trim().toLowerCase();
+}
+
 const Messages: Messages = {
   "en-US": {
     prompts: {
-      "enter-openai-key": "Enter your OpenAI API key > ",
-      "unstaged-commits-confirm-add": "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
-      "accept-which-summary": "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >",
-      "combine-summaries-selection": "Enter the numbers of the commit messages to combine, separated by spaces > ",
-      "accept-yes-no": "Accept? (Y, n) > ",
+      "enter-openai-key": {
+        text: "Enter your OpenAI API key > ", answers: {
+          "open-ended": "open-ended",
+        }
+      },
+      "unstaged-commits-confirm-add": {
+        text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
+        answers: {}
+      },
+      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >", answers: {} },
+      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > ", answers: {} },
+      "accept-yes-no": { text: "Accept? (Y, n) > ", answers: {} },
     },
     messages: {
       "staging-all-files": "Staging all files...",
@@ -194,11 +236,21 @@ const Messages: Messages = {
   "fr-CH": undefined,
   "fr-FR": {
     prompts: {
-      "enter-openai-key": "Entrez votre clé API OpenAI > ",
-      "unstaged-commits-confirm-add": "Vous avez des commits non indexés. Voulez-vous les indexer avant de générer les messages de commit ? (Y, n) > ",
-      "accept-which-summary": "Accepter quel résumé ? (#, [n]one, [c]ombine, [r]egenerate) >",
-      "combine-summaries-selection": "Entrez les numéros des messages de commit à combiner, séparés par des espaces > ",
-      "accept-yes-no": "Accepter ? (Y, n) > ",
+      "enter-openai-key": { text: "Entrez votre clé API OpenAI > ", answers: {} },
+      "unstaged-commits-confirm-add": {
+        text: "Vous avez des commits non indexés. Voulez-vous les indexer avant de générer les messages de commit ? (O)ui, (n)o > ", answers: {
+          "yes": "O",
+          "no": "n",
+        }
+      },
+      "accept-which-summary": { text: "Accepter quel résumé ? #, [n]un, [c]ombiner, [r]égénérer >" },
+      "combine-summaries-selection": { text: "Entrez les numéros des messages de commit à combiner, séparés par des espaces > " },
+      "accept-yes-no": {
+        text: "Accepter ? (O)ui, (n)o > ", answers: {
+          "yes": "O",
+          "no": "n",
+        }
+      },
     },
     messages: {
       "staging-all-files": "Indexation de tous les fichiers...",
@@ -262,11 +314,16 @@ const Messages: Messages = {
   "it-CH": undefined,
   "it-IT": {
     prompts: {
-      "enter-openai-key": "Inserisci la tua chiave API di OpenAI > ",
-      "unstaged-commits-confirm-add": "Hai dei commit non in stage. Vuoi metterli in stage prima di generare i messaggi di commit? (Y, n) > ",
-      "accept-which-summary": "Quale riepilogo vuoi accettare? (#, [n]essuno, [c]ombina, [r]igenera) >",
-      "combine-summaries-selection": "Inserisci i numeri dei messaggi di commit da combinare, separati da spazi > ",
-      "accept-yes-no": "Accetti? (Y, n) > ",
+      "enter-openai-key": { text: "Inserisci la tua chiave API di OpenAI > " },
+      "unstaged-commits-confirm-add": {
+        text: "Hai dei commit non in stage. Vuoi metterli in stage prima di generare i messaggi di commit? (S)i, (n)o > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      },
+      "accept-which-summary": { text: "Quale riepilogo vuoi accettare? (#, [n]essuno, [c]ombina, [r]igenera) >" },
+      "combine-summaries-selection": { text: "Inserisci i numeri dei messaggi di commit da combinare, separati da spazi > " },
+      "accept-yes-no": { text: "Accetti? (S)i, (n)o > ", answers: {} },
     },
     messages: {
       "staging-all-files": "Mettendo in stage tutti i file...",

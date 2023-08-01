@@ -19,8 +19,7 @@ export default async function checkStagedCommits() {
   }
 
   if (status.filter(s => s.type === "unknown" || s.type === "modified-partly-staged").length > 0) {
-    console.log(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"]));
-    const answer = await consoleHelpers.readline("(Y, n) > ");
+    const answer = await consoleHelpers.readline(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text));
     if (answer.toLowerCase() === "y" || answer.trim().length === 0) {
       console.log(MessagesForCurrentLanguage.messages["staging-all-files"])
       git.add();

@@ -9,6 +9,7 @@ import cache from './lib/cache.js';
 import checkStagedCommits from './lib/checkStagedCommits.js';
 import packageJson from './lib/packageJson.js';
 import displayOptions from './lib/displayOptions.js';
+import MessagesForCurrentLanguage, { convertAnswerToDefault } from './lib/messages.js';
 
 const program = new Command();
 
@@ -40,14 +41,14 @@ async function main(noCache?: boolean) {
   let openAiKey = envOpenAiKey ?? existingConfig.openAIApiKey;
   const hasApiKey = existingConfig.openAIApiKey !== undefined || envOpenAiKey !== undefined;
   if (!hasApiKey || options.configure) {
-    configure().then(()=>{
+    configure().then(() => {
       main();
     });
     return;
   }
 
   if (!hasApiKey || !openAiKey || openAiKey.length === 0) {
-    console.error("You must set the OPENAI_API_KEY environment variable, or run `ava-commit --configure`");
+    console.error(MessagesForCurrentLanguage.messages["openai-key-required"]);
     return;
   }
   try {
@@ -58,7 +59,7 @@ async function main(noCache?: boolean) {
     const previousSummaryRun = cache.getPreviousRun(diffs);
 
     if (previousSummaryRun && !noCache) {
-      console.log(chalk.green("Using cached summaries and commit messages from previous run."));
+      console.log(chalk.green(MessagesForCurrentLanguage.messages["using-cached-summaries"]));
       summaries = previousSummaryRun.summaries;
       commitMessages = previousSummaryRun.commitMessages;
     } else {
@@ -69,20 +70,30 @@ async function main(noCache?: boolean) {
     let done = false;
     while (!done) {
       displayOptions(commitMessages);
-      const answer = await consoleHelpers.readline("Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) > ");
-      switch (answer.toLowerCase()) {
+      const userAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["accept-which-summary"].text);
+      const answer = convertAnswerToDefault(
+        MessagesForCurrentLanguage.prompts["accept-which-summary"],
+        userAnswer.trim().toLowerCase(),
+        "n"
+      );
+      switch (answer) {
         case "r": {
           main(true);
           return;
         }
         case "c": {
-          const answer = await consoleHelpers.readline("Enter the numbers of the commit messages to combine, separated by spaces > ");
-          const numbers = answer.split(" ").map(n => parseInt(n));
+          const answer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text);
+          const numbers = answer.split(" ").join(",").split(",").map(s => s.trim()).filter(s => s.length > 0).map(n => parseInt(n));
           const combined = numbers.map(n => commitMessages[n - 1]);
           const resummarized = await combineSummaries(openAiKey!, combined);
-          console.log("Combined commit message:\n", resummarized);
-          const acceptCombinedAnswer = await consoleHelpers.readline("Accept? (Y, n) > ");
-          if (acceptCombinedAnswer.toLowerCase() === "y" || answer.trim().length === 0) {
+          console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
+          const userAcceptCombinedAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["accept-yes-no"].text);
+          const acceptCombinedAnswer = convertAnswerToDefault(
+            MessagesForCurrentLanguage.prompts["accept-yes-no"],
+            userAcceptCombinedAnswer.trim().toLowerCase(),
+            "y"
+          );
+          if (acceptCombinedAnswer === "y" || acceptCombinedAnswer.trim().length === 0) {
             git.commit(resummarized);
             cache.deletePreviousRun(diffs);
             done = true;
@@ -92,19 +103,19 @@ async function main(noCache?: boolean) {
         }
         case "n": {
           // None
-          console.log(chalk.red("Aborting commit"));
+          console.log(chalk.red(MessagesForCurrentLanguage.messages["aborting-commit"]));
           done = true;
           return;
         }
         default: {
           if (answer.length === 0) {
-            console.log(chalk.red("Aborting commit"));
+            console.log(chalk.red(MessagesForCurrentLanguage.messages["aborting-commit"]));
             done = true;
             return;
           }
 
           const commitMessage = commitMessages[parseInt(answer) - 1];
-          console.log("Selected commit message: ", commitMessage)
+          console.log(MessagesForCurrentLanguage.messages['selected-commit-message'], commitMessage)
           git.commit(commitMessage);
           cache.deletePreviousRun(diffs);
           done = true;
@@ -114,6 +125,7 @@ async function main(noCache?: boolean) {
     }
   } catch (e) {
     console.error(e);
+    // Should probably log this using some telemetry
   }
 }
 

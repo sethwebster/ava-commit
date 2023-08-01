@@ -64,7 +64,7 @@ export async function configure() {
       output: process.stdout,
     })
 
-    rl.question(MessagesForCurrentLanguage.prompts['enter-openai-key'], (answer) => {
+    rl.question(MessagesForCurrentLanguage.prompts['enter-openai-key'].text, (answer) => {
       saveConfig({ ...existingConfig, openAIApiKey: answer });
       resolve();
     });
