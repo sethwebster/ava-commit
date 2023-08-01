@@ -12,8 +12,8 @@
     "ava-commit": "./dist/index.js"
   },
   "scripts": {
-    "dev": "npx tsc -w",
-    "build": "npx tsc",
+    "dev": "tsc -w",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
