@@ -86,7 +86,6 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
   return summary.text;
 }
 
-
 export async function summarizeDiffs(openAiApiKey: string, diffs: string[], verbose?: boolean) {
   const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
   process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);

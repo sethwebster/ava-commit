@@ -7,15 +7,37 @@ type GitStatusEntry = {
   path: string;
 }
 
+interface DiffOptions {
+  baseCompare?: string;
+  compare?: string;
+  staged?: boolean;
+}
+
 function currentBranch() {
   const currentBranch = spawn("git", ["branch", "--show-current"]) ?? "";
   return currentBranch;
 }
 
-async function diff() {
+async function diff(options?: DiffOptions) {
   return new Promise<string[]>((resolve, reject) => {
     const branch = (currentBranch() ?? "HEAD").trim();
-    const diffResult = spawn("git", ["diff", branch, "--staged"]) ?? "";
+    const args: string[] = [
+      "diff",
+      options ? "" : "--staged",
+      options ? "" : branch
+    ].filter(n => n.length > 0)
+    if (options) {
+      if (options?.baseCompare) {
+        args.push(options.baseCompare);
+      }
+      if (options?.compare) {
+        args.push(options.compare);
+      }
+      if (options?.staged) {
+        args.push("--staged");
+      }
+    }
+    const diffResult = spawn("git", args) ?? "";
     const splits = diffResult.split("diff --git");
     return resolve(splits);
   });
