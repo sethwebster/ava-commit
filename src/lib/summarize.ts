@@ -4,6 +4,7 @@ import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
 import { options } from '../index.js';
 import { Animation } from 'chalk-animation';
+import MessagesForCurrentLanguage from './messages.js';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -39,10 +40,16 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
   const chain = new LLMChain({
     llm: model,
     prompt: template,
-    verbose: false,
+    verbose: options.verbose,
   });
 
-  const summary = await chain.call({ diff });
+  if (diff.length>=3000 && diff.length <= 4000) {
+    console.log("THE DIFF", diff.length, diff)
+  }
+  console.log(`Summarizing diff of ${diff.length} characters`)
+  const summaryPromise =  chain.call({ diff });
+  const summary = await summaryPromise;
+  console.log(`Summarized diff of ${diff.length} characters`)
   process.stdout.write(".");
   return summary.text;
 }
@@ -54,7 +61,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
  * @returns A string combined from the LLM
  */
 export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
-  const rainbow = chalkAnimation.rainbow(`Ava is combining ${summaries.length} summaries...`);
+  const rainbow = chalkAnimation.rainbow(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} 0 characters`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
@@ -79,7 +86,7 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
   const summary = await chain.call({ summaries: summaries.join("\n\n---\n\n") }, [{
     handleLLMNewToken: (token) => {
       summaryText += token;
-      (rainbow as Animation).replace(`Ava is combining ${summaries.length} summaries... ${summaryText.length} characters`);
+      (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} ${summaryText.length} characters`);
     }
   }]);
   console.log();
@@ -89,18 +96,23 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
 
 export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
   const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
-  process.stdout.write(`Summarizing ${chalk.bold(chalk.yellow(filtered.length))} diffs`);
+  process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
+  let summaries: string[] = [];
   const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff));
-  const summaries = await Promise.all(summaryPromises);
+  for (let promise of summaryPromises) {
+    const summary = await promise;
+    summaries.push(summary);
+    console.log("x");
+  }
   process.stdout.cursorTo(0);
   process.stdout.clearLine(0);
-  console.log(`Summarized ${chalk.bold(chalk.yellow(filtered.length))} diffs`);
+  console.log(`${MessagesForCurrentLanguage.messages.summarized} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}}`);
   return summaries;
 }
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
   const maxLen = options.length ?? 150;
-  const rainbow = chalkAnimation.rainbow(`Ava is working...`);
+  const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
@@ -159,7 +171,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
-        (rainbow as Animation).replace(`Ava is working... ${summaryText.length} characters`);
+        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${summaryText.length} ${MessagesForCurrentLanguage.messages['characters']}}`);
       }
     }
   ]) as { text: string; };
