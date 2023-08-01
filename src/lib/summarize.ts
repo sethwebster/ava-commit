@@ -35,7 +35,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
     {diff}
     
     Summary:`,
-  });
+  }); 
 
   const chain = new LLMChain({
     llm: model,

@@ -2,7 +2,7 @@ import chalk from "chalk";
 import git from "./git.js";
 import { options } from "../index.js";
 import consoleHelpers from "./consoleHelpers.js";
-import messages from "./messages.js";
+import { convertAnswerToDefault } from "./messages.js";
 import MessagesForCurrentLanguage from "./messages.js";
 
 export default async function checkStagedCommits() {
@@ -19,8 +19,9 @@ export default async function checkStagedCommits() {
   }
 
   if (status.filter(s => s.type === "unknown" || s.type === "modified-partly-staged").length > 0) {
-    const answer = await consoleHelpers.readline(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text));
-    if (answer.toLowerCase() === "y" || answer.trim().length === 0) {
+    const userAnswer = await consoleHelpers.readline(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text));
+    const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"], userAnswer.trim().toLowerCase(), "y");
+    if (answer === "y" || answer.trim().length === 0) {
       console.log(MessagesForCurrentLanguage.messages["staging-all-files"])
       git.add();
     }
