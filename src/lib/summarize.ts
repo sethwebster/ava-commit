@@ -25,7 +25,15 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
 
   const template = new PromptTemplate({
     inputVariables: ["diff"],
-    template: "Create a multi-line summary of the follwing diff. You may have a 50 word summary on line 1, followed by more details on up to 5 lines below:\n\n{diff}\n\nSummary:",
+    template: `Create a multi-line summary of the follwing diff. 
+    
+    You may have a 50 word summary on line 1, followed by more details on up to 5 lines below.
+
+    Note: lines that start with a + were added, lines that start with a - were removed.
+    
+    {diff}
+    
+    Summary:`,
   });
 
   const chain = new LLMChain({

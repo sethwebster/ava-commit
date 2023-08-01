@@ -4,6 +4,10 @@
   "description": "",
   "main": "./src/index.ts",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sethwebster/ava-commit"
+  },
   "bin": {
     "ava-commit": "./dist/index.js"
   },
