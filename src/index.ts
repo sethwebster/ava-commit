@@ -8,6 +8,7 @@ import { combineSummaries, summarizeDiffs, summarizeSummaries } from './lib/summ
 import cache from './lib/cache.js';
 import checkStagedCommits from './lib/checkStagedCommits.js';
 import packageJson from './lib/packageJson.js';
+import displayOptions from './lib/displayOptions.js';
 
 const program = new Command();
 
@@ -20,6 +21,7 @@ program.version(packageJson.packageVersion())
   .option<number>('-l,--length [number]', 'Length of commit message', (val, prev) => {
     return parseInt(val);
   }, 80)
+  .option("--release-notes", "Generate release notes", false)
   .option('--configure', 'Configure the tool')
   .addHelpText('after', `\n`)
   .addHelpText('after', `Examples:`)
@@ -29,12 +31,8 @@ program.version(packageJson.packageVersion())
   .addHelpText('after', `  $ ava-commit --length 150 # create a commit message for staged files, targeting max summary of 150 characters`)
   .parse(process.argv);
 
-export const options = program.opts();
 
-function displayOptions(options: string[]) {
-  const message = options.map((m, i) => `${chalk.bold(chalk.yellow(i + 1))}. ${m}`).join("\n");
-  console.log(`Commit message options:\n${message}`);
-}
+export const options = program.opts();
 
 async function main(noCache?: boolean) {
   const existingConfig = loadConfig();
@@ -42,8 +40,9 @@ async function main(noCache?: boolean) {
   let openAiKey = envOpenAiKey ?? existingConfig.openAIApiKey;
   const hasApiKey = existingConfig.openAIApiKey !== undefined || envOpenAiKey !== undefined;
   if (!hasApiKey || options.configure) {
-    configure();
-    main();
+    configure().then(()=>{
+      main();
+    });
     return;
   }
 
@@ -51,13 +50,13 @@ async function main(noCache?: boolean) {
     console.error("You must set the OPENAI_API_KEY environment variable, or run `ava-commit --configure`");
     return;
   }
-
   try {
     let summaries: string[];
     let commitMessages: string[];
     await checkStagedCommits();
     const diffs = await git.diff();
     const previousSummaryRun = cache.getPreviousRun(diffs);
+
     if (previousSummaryRun && !noCache) {
       console.log(chalk.green("Using cached summaries and commit messages from previous run."));
       summaries = previousSummaryRun.summaries;
