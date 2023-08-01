@@ -2,7 +2,6 @@ import { LLMChain } from 'langchain/chains';
 import { PromptTemplate } from 'langchain/prompts';
 import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
-import { options } from '../index.js';
 import { Animation } from 'chalk-animation';
 import MessagesForCurrentLanguage from './messages.js';
 
@@ -16,7 +15,7 @@ var chalkAnimation: { rainbow: (text: string) => Animation; };
   chalkAnimation = (await import("chalk-animation")).default;
 })();
 
-async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string> {
+async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boolean): Promise<string> {
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
@@ -40,7 +39,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string): Promise<string
   const chain = new LLMChain({
     llm: model,
     prompt: template,
-    verbose: options.verbose,
+    verbose: verbose,
   });
 
   const summary = await chain.call({ diff });
@@ -88,10 +87,10 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
 }
 
 
-export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
+export async function summarizeDiffs(openAiApiKey: string, diffs: string[], verbose?: boolean) {
   const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
   process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
-  const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff));
+  const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff, verbose));
   const summaries = await Promise.all(summaryPromises);
   process.stdout.cursorTo(0);
   process.stdout.clearLine(0);
@@ -99,8 +98,7 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[]) {
   return summaries;
 }
 
-export async function summarizeSummaries(openAiApiKey: string, summaries: string[]): Promise<string[]> {
-  const maxLen = options.length ?? 150;
+export async function summarizeSummaries(openAiApiKey: string, summaries: string[], maxLength: number, verbose?: boolean): Promise<string[]> {
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
@@ -120,7 +118,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
       Create 2 to 3 multi-line commit message options that combine the summaries provided. 
       
       Commit Message Format: 
-      The first line with have ${maxLen} characters or less for them, and no more than 10 bulleted lines will follow. 
+      The first line with have ${maxLength} characters or less for them, and no more than 10 bulleted lines will follow. 
       Each message will stand on its own as a complete commit message. Options should NOT span multiple options, and should each include all
       important information.
       
@@ -152,7 +150,7 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
   const chain = new LLMChain({
     llm: model,
     prompt: template,
-    verbose: false,
+    verbose: verbose,
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
   let summaryText = "";

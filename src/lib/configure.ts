@@ -55,7 +55,7 @@ export function loadConfig(): Options {
   }
 }
 
-export async function configure() {
+export async function configure(options: any) {
   return new Promise<void>((resolve, reject) => {
     console.log(welcomeMessage);
     const existingConfig = loadConfig();

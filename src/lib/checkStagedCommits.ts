@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import git from "./git.js";
-import { options } from "../index.js";
 import consoleHelpers from "./consoleHelpers.js";
 import { convertAnswerToDefault } from "./messages.js";
 import MessagesForCurrentLanguage from "./messages.js";
 
-export default async function checkStagedCommits() {
+export default async function checkStagedCommits(options: { all: boolean } = { all: false }) {
   const status = git.status({ short: true });
   if (status.length === 0) {
     console.log(chalk.red(MessagesForCurrentLanguage.errors["no-diff"]));

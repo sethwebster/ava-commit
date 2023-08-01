@@ -21,9 +21,26 @@ async function diff() {
   });
 }
 
+async function fetch({ all }: { all?: boolean } = {}) {
+  return new Promise((resolve, reject) => {
+    const fetchResult = spawn("git", ["fetch", all ? "--all" : ""]);
+    return resolve(fetchResult);
+  });
+}
+
+async function tags() {
+  return new Promise<string[]>((resolve, reject) => {
+    const tagsResult = spawn("git", ["tag"]) ?? "";
+    const tags = tagsResult.split("\n").filter(t => t.trim().length > 0);
+    return resolve(tags);
+  });
+}
+
 async function add(addStr = ".") {
-  const addResult = spawn("git", ["add", "."]);
-  return addResult;
+  return new Promise((resolve, reject) => {
+    const addResult = spawn("git", ["add", "."]);
+    return resolve(addResult);
+  });
 }
 
 async function commit(commitMessage: string) {
@@ -64,7 +81,9 @@ const git = {
   add,
   commit,
   status,
-  currentBranch
+  currentBranch,
+  fetch,
+  tags,
 }
 
 export default git;

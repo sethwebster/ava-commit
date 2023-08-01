@@ -87,11 +87,10 @@ const Messages: Messages = {
       },
       "unstaged-commits-confirm-add": {
         text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
-        answers: {}
       },
-      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >", answers: {} },
-      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > ", answers: {} },
-      "accept-yes-no": { text: "Accept? (Y, n) > ", answers: {} },
+      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >" },
+      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > " },
+      "accept-yes-no": { text: "Accept? (Y, n) > " },
     },
     messages: {
       "staging-all-files": "Staging all files...",
