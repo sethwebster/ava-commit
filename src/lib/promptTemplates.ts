@@ -57,6 +57,9 @@ const summarizeSummaries = new PromptTemplate({
     - additional info line 5
     -- output --      
     Output:
+    {{output}}
+
+    🤖 Generated with Ava Commit
     `
 });
 
@@ -85,6 +88,9 @@ const releaseNotes = new PromptTemplate({
     ...
     -- output --      
     Output:
+    {{output}}
+
+    🤖 Generated with Ava Commit
     `
 });
 

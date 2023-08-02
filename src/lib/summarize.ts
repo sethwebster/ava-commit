@@ -93,8 +93,8 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[], verb
   process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
   const summaryPromises = filtered.map(diff => summarizeDiff(openAiApiKey, diff, verbose));
   const summaries = await Promise.all(summaryPromises);
-  process.stdout.cursorTo(0);
-  process.stdout.clearLine(0);
+  (process.stdout.cursorTo && process.stdout.cursorTo(0));
+  (process.stdout.clearLine && process.stdout.clearLine(0));
   console.log(`${MessagesForCurrentLanguage.messages.summarized} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
   return summaries;
 }
