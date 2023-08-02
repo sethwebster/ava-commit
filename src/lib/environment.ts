@@ -3,6 +3,7 @@ import packageJson from './packageJson.js';
 import chalk from 'chalk';
 import boxen, { Options } from 'boxen';
 import cancelablePromise from './CancelablePromise.js';
+import { compareVersions } from 'compare-versions';
 
 export function makeAvaHomePath() {
   return `${process.env.HOME}/.ava-commit`;
@@ -42,7 +43,8 @@ export async function checkForLatestVersion() {
   const response = await fetch(`https://registry.npmjs.org/@sethwebster/ava-commit/latest`);
   const json = await response.json();
   const latestVersion = json.version;
-  if (currentVersion !== latestVersion) {
+  const versionComparison = compareVersions(currentVersion, latestVersion);
+  if (versionComparison === -1) {
     // Draw a corner and a line
     const options: Options = {
       padding: 1,

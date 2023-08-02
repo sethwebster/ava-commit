@@ -13,6 +13,9 @@ dependencies:
   commander:
     specifier: ^11.0.0
     version: 11.0.0
+  compare-versions:
+    specifier: ^6.0.0
+    version: 6.0.0
   figlet:
     specifier: ^1.6.0
     version: 1.6.0
@@ -315,6 +318,10 @@ packages:
   /commander@11.0.0:
     resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
     engines: {node: '>=16'}
+    dev: false
+
+  /compare-versions@6.0.0:
+    resolution: {integrity: sha512-s2MzYxfRsE9f/ow8hjn7ysa7pod1xhHdQMsgiJtKx6XSNf4x2N1KG4fjrkUmXcP/e9Y2ZX4zB6sHIso0Lm6evQ==}
     dev: false
 
   /crypt@0.0.2:

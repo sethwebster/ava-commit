@@ -6,6 +6,7 @@ import { summarizeDiffs } from "./summarize.js";
 import { Animation } from 'chalk-animation';
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
+import { compareVersions } from 'compare-versions';
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -26,7 +27,9 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     return;
   }
   await git.fetch({ all: true });
-  const tags = (await git.tags()).reverse();
+  const tags = (await git.tags()).sort((a, b) => {
+    return compareVersions(a, b);
+  }).reverse();
   const latest = tags.shift();
   console.log("+++ " + latest);
   const diffs = await git.diff({ baseCompare: latest, compare: "HEAD" });
