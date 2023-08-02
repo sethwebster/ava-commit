@@ -501,7 +501,90 @@ const Messages: Messages = {
   },
   "iu": undefined,
   "ja-JP": undefined,
-  "ja": undefined,
+  "ja": {
+    "prompts": {
+      "enter-openai-key": {
+        "text": "OpenAIのAPIキーを入力してください > ",
+        "answers": {
+          "open-ended": "o"
+        }
+      },
+      "unstaged-commits-confirm-add": {
+        "text": "ステージングされていないコミットがあります。コミットメッセージを生成する前にステージングしますか？ (はい, いいえ) > ",
+        "answers": {
+          "yes": "は",
+          "no": "い"
+        }
+      },
+      "accept-which-summary": {
+        "text": "どの要約を受け入れますか？ (#, [な]し, [結]合, [再]生成) > ",
+        "answers": {
+          "none": "な",
+          "combine": "結",
+          "regenerate": "再"
+        }
+      },
+      "combine-summaries-selection": {
+        "text": "スペースで区切って結合するコミットメッセージの番号を入力してください > "
+      },
+      "accept-yes-no": {
+        "text": "受け入れますか？ (はい, いいえ) > ",
+        "answers": {
+          "yes": "は",
+          "no": "い"
+        }
+      },
+      "update-now": {
+        "text": "今すぐアップデートしますか？ (はい, いいえ) > ",
+        "answers": {
+          "yes": "は",
+          "no": "い"
+        }
+      }
+    },
+    "messages": {
+      "staging-all-files": "すべてのファイルをステージングしています...",
+      "openai-key-required": "OPENAI_API_KEY環境変数を設定するか、`ava-commit --configure`を実行する必要があります",
+      "using-cached-summaries": "前回の実行からのキャッシュされた要約とコミットメッセージを使用しています。",
+      "summaries-combined-confirmation": "結合されたコミットメッセージ:",
+      "aborting-commit": "コミットを中止",
+      "selected-commit-message": "選択されたコミットメッセージ: ",
+      "welcome": "{name}へようこそ。これはAIによるコミットメッセージジェネレーターです。",
+      "description": "このツールは、より良いコミットメッセージの作成を支援します。",
+      "openai-api-key-instructons": "このツールを使用するには、OpenAIのAPIキーが必要です。ここで取得できます: 🔗 https://platform.openai.com/account/api-keys",
+      "commit-message-options": "コミットメッセージのオプション:",
+      "ava-is-combining-summaries": "Avaは{summaryCount}の要約を結合しています...",
+      "ava-is-working": "Avaが作業中...",
+      "characters": "文字",
+      "summarizing": "要約中",
+      "summarized": "要約済み",
+      "summaries": "要約",
+      "diffs": "差分",
+      "update-available-header": "アップデートが利用可能です",
+      "update-available-body": "は最新版ではありません。最新バージョンは",
+      "run": "実行",
+      "to-update": "アップデートするには",
+      "update-confirmation": "次のパッケージがアップデートされました: ",
+      "version": "バージョン",
+      "update-command-description": "アップデートを確認",
+      "release-notes-command-description": "最新のタグからの変更に基づいてリリースノートを生成",
+      "configure-command-description": "ツールの設定",
+      "generate-command-description": "コミットメッセージの生成",
+      "option-all-description": "全てのコミット、ステージングされたものだけでなく",
+      "option-verbose-description": "詳細な出力",
+      "option-length-description": "コミットメッセージの長さ",
+      "option-configure-description": "ツールの設定",
+      "example-1": "$ ava-commit generate                # すべてデフォルトでステージングされたファイルのコミットメッセージを生成",
+      "example-2": "$ ava-commit generate --all          # ステージングされたファイルのチェックをバイパスして、ステージングされたファイルのコミットメッセージを生成",
+      "example-3": "$ ava-commit generate --length 150   # 最大要約を150文字にターゲットにして、ステージングされたファイルのコミットメッセージを生成",
+      "usage": "コマンド [オプション]",
+      "display-help-for-a-command": "コマンドのヘルプを表示",
+      "display-version-information": "バージョン情報を表示",
+    },
+    "errors": {
+      "no-diff": "コミットする変更がありません",
+    }
+  },
   "jv": undefined,
   "ka-GE": undefined,
   "ka": undefined,
@@ -755,6 +838,7 @@ propagateMessagesToOtherSimilarLanguageLocales(Messages["fr"] as CliMessages, "f
 propagateMessagesToOtherSimilarLanguageLocales(Messages["it"] as CliMessages, "it");
 propagateMessagesToOtherSimilarLanguageLocales(Messages["es"] as CliMessages, "es");
 propagateMessagesToOtherSimilarLanguageLocales(Messages["ru"] as CliMessages, "ru");
+propagateMessagesToOtherSimilarLanguageLocales(Messages["ja"] as CliMessages, "ja");
 
 const lang = getLanguage();
 
