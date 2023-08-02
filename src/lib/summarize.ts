@@ -6,6 +6,7 @@ import { Animation } from 'chalk-animation';
 import MessagesForCurrentLanguage from './messages.js';
 import { countWords } from 'alfaaz';
 import { ChainValues } from 'langchain/schema';
+import promptTemplates from './promptTemplates.js';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -25,22 +26,9 @@ async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boole
     maxTokens: -1,
   });
 
-  const template = new PromptTemplate({
-    inputVariables: ["diff"],
-    template: `Create a multi-line summary of the follwing diff. 
-    
-    You may have a 50 word summary on line 1, followed by more details on up to 5 lines below.
-
-    Note: lines that start with a + were added, lines that start with a - were removed.
-    
-    {diff}
-    
-    Summary:`,
-  });
-
   const chain = new LLMChain({
     llm: model,
-    prompt: template,
+    prompt: promptTemplates.summarizeDiff,
     verbose: verbose,
   });
 
@@ -80,14 +68,10 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
     streaming: true,
   });
 
-  const template = new PromptTemplate({
-    inputVariables: ["summaries"],
-    template: "Combine the following summaries into a single summary. It should have a first line (no more than 100 chars) overall summary followed by bullets that expand on the summary. Do not remove any important information:\n\n{summaries}\n\nSummary:",
-  });
 
   const chain = new LLMChain({
     llm: model,
-    prompt: template,
+    prompt: promptTemplates.combineSummaries,
     verbose: false,
   });
 
@@ -126,52 +110,14 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     streaming: true,
   });
 
-  const template = new PromptTemplate({
-    inputVariables: ["summaries"],
-    template: `These are summaries of ${summaries.length} diffs. 
-      -- instructions -- 
-      
-      Purpose: 
-      Create 2 to 3 multi-line commit message options that combine the summaries provided. 
-      
-      Commit Message Format: 
-      The first line with have ${maxLength} characters or less for them, and no more than 10 bulleted lines will follow. 
-      Each message will stand on its own as a complete commit message. Options should NOT span multiple options, and should each include all
-      important information.
-      
-      Guiding Principles:
-      Prioritze added code over changes to package lock files or package.json. Don't include any diffs that are just package lock changes.
-      Don't include messages about adding imports.
-
-      Output Format:
-      - Output each summary separated by "\n\n---\n\n" and do NOT include a heading at all like "Option 1" or "Option 2".
-      - Include ONLY the commit message and no headings.
-
-      Special Note: If functionality has changed, but the version in the package.json hasn't changed, return a header above all of the options: [CHECK PACKAGE VERSION]
-
-      -- input content --
-      {summaries}
-      
-      -- example output --
-      Summary
-      - additional info line 1
-      - additional info line 2
-      - additional info line 3
-      - additional info line 4
-      - additional info line 5
-      -- output --      
-      Output:
-      `
-  });
-
   const chain = new LLMChain({
     llm: model,
-    prompt: template,
+    prompt: promptTemplates.summarizeSummaries,
     verbose: verbose,
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
   let summaryText = "";
-  const summary = await chain.call({ summaries: mappedSummaries }, [
+  const summary = await chain.call({ summaries: mappedSummaries, numberOfDiffs: summaries.length, maxLength }, [
     {
       handleLLMNewToken: (token) => {
         summaryText += token;

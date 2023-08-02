@@ -8,6 +8,7 @@ import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { compareVersions } from 'compare-versions';
 import { countWords } from "alfaaz";
+import promptTemplates from "./promptTemplates.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -45,40 +46,15 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     streaming: true,
   });
 
-  const template = new PromptTemplate({
-    inputVariables: ["summaries"],
-    template: `These are summaries of ${summaries.length} diffs between product releases. 
-      -- instructions -- 
-      
-      Purpose: 
-      Create awesome, exciting release notes of the change between the last release (${latest}) and now. Use GitHub flavored markdown.
-      
-      Special Note: If functionality has changed, but the version in the package.json hasn't changed, return a header on the options: [CHECK PACKAGE VERSION]
-
-      -- input content --
-      {summaries}
-      
-      -- example output --
-      Summary
-      - additional info line 1
-      - additional info line 2
-      - additional info line 3
-      - additional info line 4
-      - additional info line 5
-      ...
-      -- output --      
-      Output:
-      `
-  });
 
   const chain = new LLMChain({
     llm: model,
-    prompt: template,
+    prompt: promptTemplates.releaseNotes,
     verbose: verbose,
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
   let summaryText = "";
-  const summary = await chain.call({ summaries: mappedSummaries }, [
+  const summary = await chain.call({ summaries: mappedSummaries, numberOfDiffs: summaries.length, latest }, [
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
