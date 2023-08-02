@@ -28,6 +28,7 @@ type CliMessages = {
     "accept-which-summary": CliPrompt;
     "combine-summaries-selection": CliPrompt;
     "accept-yes-no": CliPrompt;
+    "update-now": CliPrompt;
   },
   messages: {
     "staging-all-files": string;
@@ -47,6 +48,11 @@ type CliMessages = {
     "summarized": string;
     "summaries": string;
     "diffs": string;
+    "update-available-header": string;
+    "update-available-body": string;
+    "run": string;
+    "to-update": string;
+    "update-confirmation": string;
   }
   errors: {
     "no-diff": string;
@@ -78,43 +84,7 @@ export function convertAnswerToDefault(prompt: CliPrompt, answer: string, defaul
 }
 
 const Messages: Messages = {
-  "en-US": {
-    prompts: {
-      "enter-openai-key": {
-        text: "Enter your OpenAI API key > ", answers: {
-          "open-ended": "open-ended",
-        }
-      },
-      "unstaged-commits-confirm-add": {
-        text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
-      },
-      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >" },
-      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > " },
-      "accept-yes-no": { text: "Accept? (Y, n) > " },
-    },
-    messages: {
-      "staging-all-files": "Staging all files...",
-      "openai-key-required": "You must set the OPENAI_API_KEY environment variable, or run `ava-commit --configure`",
-      "using-cached-summaries": "Using cached summaries and commit messages from previous run.",
-      "summaries-combined-confirmation": "Combined commit message:",
-      "aborting-commit": "Aborting commit",
-      "selected-commit-message": "Selected commit message: ",
-      "welcome": "Welcome to {name}, the AI-powered commit message generator.",
-      "description": "This tool will help you write better commit messages.",
-      "openai-api-key-instructons": "To use this tool, you'll need an OpenAI API key. You can get one here: 🔗 https://platform.openai.com/account/api-keys",
-      "commit-message-options": "Commit message options:",
-      "ava-is-combining-summaries": "Ava is combining {summaryCount} summaries...",
-      "ava-is-working": "Ava is working...",
-      "characters": "characters",
-      "summarizing": "Summarizing",
-      "summarized": "Summarized",
-      "summaries": "summaries",
-      "diffs": "diffs"
-    },
-    errors: {
-      "no-diff": "No changes to commit",
-    }
-  },
+  "en-US": undefined,
   "aa": undefined,
   "ab": undefined,
   "ae": undefined,
@@ -196,7 +166,49 @@ const Messages: Messages = {
   "en-TT": undefined,
   "en-ZA": undefined,
   "en-ZW": undefined,
-  "en": undefined,
+  "en": {
+    prompts: {
+      "enter-openai-key": {
+        text: "Enter your OpenAI API key > ", answers: {
+          "open-ended": "open-ended",
+        }
+      },
+      "unstaged-commits-confirm-add": {
+        text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
+      },
+      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >" },
+      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > " },
+      "accept-yes-no": { text: "Accept? (Y, n) > " },
+      "update-now": { text: "Would you like to update now? (Y, n) > " },
+    },
+    messages: {
+      "staging-all-files": "Staging all files...",
+      "openai-key-required": "You must set the OPENAI_API_KEY environment variable, or run `ava-commit --configure`",
+      "using-cached-summaries": "Using cached summaries and commit messages from previous run.",
+      "summaries-combined-confirmation": "Combined commit message:",
+      "aborting-commit": "Aborting commit",
+      "selected-commit-message": "Selected commit message: ",
+      "welcome": "Welcome to {name}, the AI-powered commit message generator.",
+      "description": "This tool will help you write better commit messages.",
+      "openai-api-key-instructons": "To use this tool, you'll need an OpenAI API key. You can get one here: 🔗 https://platform.openai.com/account/api-keys",
+      "commit-message-options": "Commit message options:",
+      "ava-is-combining-summaries": "Ava is combining {summaryCount} summaries...",
+      "ava-is-working": "Ava is working...",
+      "characters": "characters",
+      "summarizing": "Summarizing",
+      "summarized": "Summarized",
+      "summaries": "summaries",
+      "diffs": "diffs",
+      "update-available-header": "An update is available",
+      "update-available-body": "is out of date. The latest version is",
+      "run": "Run",
+      "to-update": "to update",
+      "update-confirmation": "The following packages have been updated: ",
+    },
+    errors: {
+      "no-diff": "No changes to commit",
+    }
+  },
   "eo": undefined,
   "es-AR": undefined,
   "es-BO": undefined,
@@ -217,7 +229,53 @@ const Messages: Messages = {
   "es-SV": undefined,
   "es-UY": undefined,
   "es-VE": undefined,
-  "es": undefined,
+  "es": {
+    prompts: {
+      "enter-openai-key": { text: "Introduzca su clave de API de OpenAI > ", answers: {} },
+      "unstaged-commits-confirm-add": {
+        text: "Tiene commits sin preparar. ¿Desea prepararlos antes de generar los mensajes de commit? (S)i, (n)o > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      },
+      "accept-which-summary": { text: "¿Qué resumen desea aceptar? (#, [n]inguno, [c]ombinar, [r]egenerar) >" },
+      "combine-summaries-selection": { text: "Introduzca los números de los mensajes de commit a combinar, separados por espacios > " },
+      "accept-yes-no": {
+        text: "¿Aceptar? (S)i, (n)o > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      },
+      "update-now": { text: "¿Desea actualizar ahora? (S)i, (n)o > ", answers: { "yes": "S", "no": "n" } },
+    },
+    messages: {
+      "staging-all-files": "Preparando todos los archivos...",
+      "openai-key-required": "Debe establecer la variable de entorno OPENAI_API_KEY, o ejecutar `ava-commit --configure`",
+      "using-cached-summaries": "Usando resúmenes y mensajes de commit en caché de la ejecución anterior.",
+      "summaries-combined-confirmation": "Mensaje de commit combinado:",
+      "aborting-commit": "Abortando commit",
+      "selected-commit-message": "Mensaje de commit seleccionado: ",
+      "welcome": "Bienvenido a {name}, el generador de mensajes de commit con IA.",
+      "description": "Esta herramienta le ayudará a escribir mejores mensajes de commit.",
+      "ava-is-combining-summaries": "Ava está combinando {summaryCount} resúmenes...",
+      "ava-is-working": "Ava está trabajando...",
+      "characters": "caracteres",
+      "summarizing": "Resumiendo",
+      "summarized": "Resumido",
+      "summaries": "resúmenes",
+      "diffs": "diferencias",
+      "update-available-header": "Hay una actualización disponible",
+      "update-available-body": "está obsoleto. La última versión es",
+      "run": "Ejecutar",
+      "to-update": "para actualizar",
+      "update-confirmation": "Los siguientes paquetes se han actualizado:",
+      "commit-message-options": "Opciones del mensaje de commit:",
+      "openai-api-key-instructons": "Para utilizar esta herramienta, necesitará una clave de API de OpenAI. Puede obtener una aquí: 🔗 https://platform.openai.com/account/api-keys",
+    },
+    errors: {
+      "no-diff": "No hay cambios para hacer commit",
+    }
+  },
   "et-EE": undefined,
   "et": undefined,
   "eu-ES": undefined,
@@ -233,7 +291,10 @@ const Messages: Messages = {
   "fr-BE": undefined,
   "fr-CA": undefined,
   "fr-CH": undefined,
-  "fr-FR": {
+  "fr-FR": undefined,
+  "fr-LU": undefined,
+  "fr-MC": undefined,
+  "fr": {
     prompts: {
       "enter-openai-key": { text: "Entrez votre clé API OpenAI > ", answers: {} },
       "unstaged-commits-confirm-add": {
@@ -250,6 +311,8 @@ const Messages: Messages = {
           "no": "n",
         }
       },
+      "update-now": { text: "Voulez-vous mettre à jour maintenant ? (O)ui, (n)o > ", answers: { "yes": "O", "no": "n" } },
+
     },
     messages: {
       "staging-all-files": "Indexation de tous les fichiers...",
@@ -268,15 +331,17 @@ const Messages: Messages = {
       "summarizing": "Résumé",
       "summarized": "Résumé",
       "summaries": "résumés",
-      "diffs": "différences"
+      "diffs": "différences",
+      "update-available-header": "Une mise à jour est disponible",
+      "update-available-body": "est obsolète. La dernière version est",
+      "run": "Exécutez",
+      "to-update": "pour mettre à jour",
+      "update-confirmation": "Les packages suivants ont été mis à jour :"
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
     },
   },
-  "fr-LU": undefined,
-  "fr-MC": undefined,
-  "fr": undefined,
   "fy": undefined,
   "ga": undefined,
   "gd": undefined,
@@ -311,7 +376,8 @@ const Messages: Messages = {
   "is-IS": undefined,
   "is": undefined,
   "it-CH": undefined,
-  "it-IT": {
+  "it-IT": undefined,
+  "it": {
     prompts: {
       "enter-openai-key": { text: "Inserisci la tua chiave API di OpenAI > " },
       "unstaged-commits-confirm-add": {
@@ -322,7 +388,13 @@ const Messages: Messages = {
       },
       "accept-which-summary": { text: "Quale riepilogo vuoi accettare? (#, [n]essuno, [c]ombina, [r]igenera) >" },
       "combine-summaries-selection": { text: "Inserisci i numeri dei messaggi di commit da combinare, separati da spazi > " },
-      "accept-yes-no": { text: "Accetti? (S)i, (n)o > ", answers: {} },
+      "accept-yes-no": {
+        text: "Accetti? (S)i, (n)o > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      },
+      "update-now": { text: "Vuoi aggiornare ora? (S)i, (n)o > ", answers: { "yes": "S", "no": "n" } },
     },
     messages: {
       "staging-all-files": "Mettendo in stage tutti i file...",
@@ -341,13 +413,17 @@ const Messages: Messages = {
       "summarizing": "Riassumendo",
       "summarized": "Riassunto",
       "summaries": "riepiloghi",
-      "diffs": "differenze"
+      "diffs": "differenze",
+      "update-available-header": "È disponibile un aggiornamento",
+      "update-available-body": "è obsoleto. L'ultima versione è",
+      "run": "Esegui",
+      "to-update": "per aggiornare",
+      "update-confirmation": "I seguenti pacchetti sono stati aggiornati:"
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
     }
   },
-  "it": undefined,
   "iu": undefined,
   "ja-JP": undefined,
   "ja": undefined,
@@ -509,17 +585,20 @@ const Messages: Messages = {
   "zu": undefined,
 }
 
-Messages.fr = Messages["fr-FR"] as CliMessages;
-Messages["fr-CA"] = Messages["fr-FR"] as CliMessages;
-Messages["fr-BE"] = Messages["fr-FR"] as CliMessages;
-Messages["fr-CH"] = Messages["fr-FR"] as CliMessages;
-Messages["fr-LU"] = Messages["fr-FR"] as CliMessages;
-Messages["fr-MC"] = Messages["fr-FR"] as CliMessages;
+function propagateMessagesToOtherSimilarLanguageLocales(messages: CliMessages, language: AvailableLanguages) {
+  const similarLanguages = Object.keys(Messages).filter(key => key.startsWith(language) && key !== language);
+  similarLanguages.forEach(similarLanguage => {
+    Messages[similarLanguage as AvailableLanguages] = messages;
+  })
+}
 
-Messages["it"] = Messages["it-IT"] as CliMessages;
-Messages["it-CH"] = Messages["it-IT"] as CliMessages;
+propagateMessagesToOtherSimilarLanguageLocales(Messages["en"] as CliMessages, "en");
+propagateMessagesToOtherSimilarLanguageLocales(Messages["fr"] as CliMessages, "fr");
+propagateMessagesToOtherSimilarLanguageLocales(Messages["it"] as CliMessages, "it");
+propagateMessagesToOtherSimilarLanguageLocales(Messages["es"] as CliMessages, "es");
 
 const lang = getLanguage();
-const MessagesForCurrentLanguage = Messages[process.env.LANG as LanguageLocales] ?? Messages[lang] as CliMessages;
+
+const MessagesForCurrentLanguage = Messages[lang] ?? Messages["en"] as CliMessages;
 
 export default MessagesForCurrentLanguage;

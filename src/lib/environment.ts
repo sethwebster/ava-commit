@@ -6,6 +6,7 @@ import { compareVersions } from 'compare-versions';
 import { exec, spawn } from './spawn.js';
 import consoleHelpers from './consoleHelpers.js';
 import cancelablePromise from './cancelablePromise.js';
+import MessagesForCurrentLanguage from './messages.js';
 
 export function makeAvaHomePath() {
   return `${process.env.HOME}/.ava-commit`;
@@ -68,12 +69,12 @@ function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: Update
       margin: 1,
       borderStyle: "round",
       dimBorder: true,
-      title: "An update is available",
+      title: MessagesForCurrentLanguage.messages['update-available-header'],
     }
     console.log(
       boxen(
-        `\🎉🎉 ${chalk.bold(chalk.green("ava-commit"))} ${chalk.bold(chalk.yellow(currentVersion))} is out of date. The latest version is ${chalk.bold(chalk.green(latestVersion))}.
-        Run ${chalk.bold(chalk.green("npm i -g @sethwebster/ava-commit"))} to update.
+        `\🎉🎉 ${chalk.bold(chalk.green("ava-commit"))} ${chalk.bold(chalk.yellow(currentVersion))} ${MessagesForCurrentLanguage.messages["update-available-body"]} ${chalk.bold(chalk.green(latestVersion))}.
+        ${MessagesForCurrentLanguage.messages["run"]} ${chalk.bold(chalk.green("npm i -g @sethwebster/ava-commit"))} ${MessagesForCurrentLanguage.messages['to-update']}.
         `, options
       )
     )
@@ -81,7 +82,7 @@ function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: Update
 }
 
 async function offerUpdate() {
-  const userUpdateOfferAnswer = await consoleHelpers.readline("Would you like to update now? (Y/n) ");
+  const userUpdateOfferAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["update-now"].text);
   const trimmed = userUpdateOfferAnswer.trim().toLowerCase();
   if (trimmed === "y" || trimmed.length === 0) {
     await doAutoUpdate();
@@ -90,7 +91,7 @@ async function offerUpdate() {
 
 export async function doAutoUpdate() {
   const updated: { [key: string]: "updated" | "error" } = {};
-  
+
   try {
     const npm = await exec("npm list -g");
     if (npm && npm.length > 0 && npm.includes("@sethwebster/ava-commit")) {
