@@ -1,5 +1,5 @@
 import Readline from 'readline';
-async function readline(question: string) {
+function readline(question: string) {
   return new Promise<string>((resolve, reject) => {
     const rl = Readline.createInterface({
       input: process.stdin,

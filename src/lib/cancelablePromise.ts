@@ -1,11 +1,17 @@
-async function cancelablePromise<T>(fn: (resolve: (value: T) => void, reject: (reason?: any) => void) => void, timeoutMs?: number): Promise<T> {  
+export default function cancelablePromise<T>(fn: (resolve: (value: T) => void, reject: (reason?: any) => void) => void, timeoutMs?: number): Promise<T> {  
   return new Promise<T>((resolve, reject) => {
+    let interval: NodeJS.Timeout;
     if (timeoutMs) {
-      setTimeout(() => {
+      interval = setTimeout(() => {
         reject("Promise timed out");
       }, timeoutMs);
     }
-    fn(resolve, reject);
+    const res = (value: T) => {
+      if (interval) {
+        clearTimeout(interval);
+      }
+      resolve(value);
+    }
+    fn(res, reject)
   });
 }
-export default cancelablePromise;

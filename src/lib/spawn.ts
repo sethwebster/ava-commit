@@ -1,4 +1,4 @@
-import { spawnSync } from "child_process";
+import { spawn as spawnBase, spawnSync, exec as execBase } from "child_process";
 
 export function spawn(command: string, args: string[]) {
   const result = spawnSync(command, args, {
@@ -19,4 +19,21 @@ export function spawn(command: string, args: string[]) {
   if (result.stdout && result.stdout.length > 0) {
     return result.stdout.toString();
   }
+}
+
+export async function exec(command: string) {
+  return new Promise<string>((resolve, reject) => {
+    execBase(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      }
+      if (stderr && stderr.length > 0) {
+        reject(stderr);
+      }
+      if (stdout && stdout.length > 0) {
+        resolve(stdout);
+      }
+      resolve("Nothing")
+    });
+  });
 }

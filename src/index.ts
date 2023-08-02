@@ -3,14 +3,17 @@ import { configure } from './lib/configure.js';
 import packageJson from './lib/packageJson.js';
 import { createReleaseNotes } from './lib/releaseNotes.js';
 import generate from './lib/generate.js';
-import {  checkForLatestVersionSafeWithTimeout } from './lib/environment.js';
+import { checkForLatestVersionAndNotify, doAutoUpdate } from './lib/environment.js';
 
 async function start() {
-  await checkForLatestVersionSafeWithTimeout(600);
+  await checkForLatestVersionAndNotify();
   const program = new Command();
   program.version(packageJson.packageVersion())
     .description("🤖 Use AI to write your commit messages")
     .name("ava-commit")
+    .addCommand(new Command("update").description("Check for updates").action(() => {
+      doAutoUpdate();
+    }))
     .addCommand(new Command("release-notes").description("Generates release notes based on what's changed since the most recent tag").action((options) => createReleaseNotes(options)))
     .addCommand(new Command("configure").description("Configure the tool").action((options) => configure(options)))
     .addCommand(new Command("generate").description("Generate a commit message")
