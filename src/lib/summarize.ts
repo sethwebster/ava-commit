@@ -4,6 +4,7 @@ import { OpenAIChat } from 'langchain/llms/openai';
 import chalk from 'chalk';
 import { Animation } from 'chalk-animation';
 import MessagesForCurrentLanguage from './messages.js';
+import { countWords } from 'alfaaz';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -79,7 +80,8 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
   const summary = await chain.call({ summaries: summaries.join("\n\n---\n\n") }, [{
     handleLLMNewToken: (token) => {
       summaryText += token;
-      (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} ${summaryText.length} characters`);
+      const wordCount = countWords(summaryText);
+      (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} ${wordCount} ${MessagesForCurrentLanguage.messages['words']}}`);
     }
   }]);
   console.log();
@@ -157,7 +159,8 @@ export async function summarizeSummaries(openAiApiKey: string, summaries: string
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
-        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${summaryText.length} ${MessagesForCurrentLanguage.messages['characters']}`);
+        const wordCount = countWords(summaryText);
+        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${wordCount} ${MessagesForCurrentLanguage.messages['words']}`);
       }
     }
   ]) as { text: string; };

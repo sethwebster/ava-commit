@@ -7,6 +7,7 @@ import { Animation } from 'chalk-animation';
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import { compareVersions } from 'compare-versions';
+import { countWords } from "alfaaz";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -81,7 +82,8 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
-        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${summaryText.length} ${MessagesForCurrentLanguage.messages['characters']}`);
+        const wordCount = countWords(summaryText);
+        (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-working']} ${wordCount} ${MessagesForCurrentLanguage.messages['words']}`);
       }
     }
   ]) as { text: string; };

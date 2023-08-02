@@ -44,6 +44,7 @@ type CliMessages = {
     "ava-is-combining-summaries": string;
     "ava-is-working": string;
     "characters": string;
+    "words":  string;
     "summarizing": string;
     "summarized": string;
     "summaries": string;
@@ -234,6 +235,7 @@ const Messages: Messages = {
       "usage": "command [options]",
       "display-help-for-a-command": "Display help for a command",
       "display-version-information": "Display version information",
+      "words": "words",
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -316,6 +318,7 @@ const Messages: Messages = {
       "usage": "comando [opciones]",
       "display-help-for-a-command": "Muestra la ayuda para un comando",
       "display-version-information": "Muestra información de la versión",
+      "words": "palabras",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -397,6 +400,7 @@ const Messages: Messages = {
       "usage": "commande [options]",
       "display-help-for-a-command": "Afficher l'aide pour une commande",
       "display-version-information": "Afficher les informations de version",
+      "words": "mots",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -494,6 +498,7 @@ const Messages: Messages = {
       "usage": "command [options]",
       "display-help-for-a-command": "Visualizza l'aiuto per un comando",
       "display-version-information": "Visualizza le informazioni sulla versione",
+      "words": "parole",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -580,6 +585,7 @@ const Messages: Messages = {
       "usage": "コマンド [オプション]",
       "display-help-for-a-command": "コマンドのヘルプを表示",
       "display-version-information": "バージョン情報を表示",
+      "words": "単語",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -749,6 +755,7 @@ const Messages: Messages = {
       "usage": "команда [опции]",
       "display-help-for-a-command": "Показать помощь для команды",
       "display-version-information": "Показать информацию о версии",
+      "words": "слова",
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",

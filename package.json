@@ -24,6 +24,7 @@
   "author": "Seth Webster",
   "license": "ISC",
   "dependencies": {
+    "alfaaz": "^1.1.0",
     "boxen": "^7.1.1",
     "chalk": "^4.1.2",
     "chalk-animation": "^2.0.3",
