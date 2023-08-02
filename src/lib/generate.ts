@@ -48,8 +48,9 @@ export default async function generate(options: { all: boolean; verbose: boolean
       const answer = convertAnswerToDefault(
         MessagesForCurrentLanguage.prompts["accept-which-summary"],
         userAnswer.trim().toLowerCase(),
-        "n"
+        userAnswer.trim().toLocaleLowerCase()
       );
+      console.log("Answer: ", answer)
       switch (answer) {
         case "r": {
           generate({ ...options, noCache: true });
