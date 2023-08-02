@@ -4,9 +4,9 @@ import chalk from 'chalk';
 import boxen, { Options } from 'boxen';
 import { compareVersions } from 'compare-versions';
 import { exec, spawn } from './spawn.js';
-import consoleHelpers from './consoleHelpers.js';
 import cancelablePromise from './cancelablePromise.js';
 import MessagesForCurrentLanguage from './messages.js';
+import { input } from '@inquirer/prompts';
 
 export function makeAvaHomePath() {
   return `${process.env.HOME}/.ava-commit`;
@@ -82,7 +82,7 @@ function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: Update
 }
 
 async function offerUpdate() {
-  const userUpdateOfferAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["update-now"].text);
+  const userUpdateOfferAnswer = await input({message: MessagesForCurrentLanguage.prompts["update-now"].text});
   const trimmed = userUpdateOfferAnswer.trim().toLowerCase();
   if (trimmed === "y" || trimmed.length === 0) {
     await doAutoUpdate();

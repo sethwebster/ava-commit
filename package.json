@@ -29,6 +29,7 @@
   "author": "Seth Webster",
   "license": "ISC",
   "dependencies": {
+    "@inquirer/prompts": "^3.0.1",
     "alfaaz": "^1.1.0",
     "boxen": "^7.1.1",
     "chalk": "^4.1.2",

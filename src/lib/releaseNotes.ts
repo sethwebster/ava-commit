@@ -15,12 +15,6 @@ var chalkAnimation: { rainbow: (text: string) => Animation; };
   chalkAnimation = (await import("chalk-animation")).default;
 })();
 
-const MODELS = {
-  "gpt35": "gpt-3.5-turbo-16k",
-  "gpt4": "gpt-4",
-}
-
-
 export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { verbose: false }) {
   const config = loadConfig();
   if (!config.openAIApiKey) {
@@ -41,7 +35,7 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: config.openAIApiKey,
-    modelName: MODELS.gpt4,
+    modelName: config.summarizeSummariesModel,
     maxTokens: -1,
     streaming: true,
   });

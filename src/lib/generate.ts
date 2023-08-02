@@ -6,7 +6,7 @@ import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.j
 import git from "./git.js";
 import { combineSummaries, summarizeDiffs, summarizeSummaries } from "./summarize.js";
 import displayOptions from "./displayOptions.js";
-import consoleHelpers from "./consoleHelpers.js";
+import { Separator, checkbox, input, select } from "@inquirer/prompts";
 
 export default async function generate(options: { all: boolean; verbose: boolean; length: number; releaseNotes: boolean; noCache?: boolean }) {
   const { all, verbose, length, releaseNotes, noCache } = options;
@@ -25,6 +25,7 @@ export default async function generate(options: { all: boolean; verbose: boolean
     console.error(MessagesForCurrentLanguage.messages["openai-key-required"]);
     return;
   }
+
   try {
     let summaries: string[];
     let commitMessages: string[];
@@ -43,12 +44,26 @@ export default async function generate(options: { all: boolean; verbose: boolean
     }
     let done = false;
     while (!done) {
-      displayOptions(commitMessages);
-      const userAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["accept-which-summary"].text);
+      // displayOptions(commitMessages);
+      console.log(); // Ends the rainbow
+      const choices = commitMessages.map((s, i) => ({ name: `${i + 1}. ${s}`, value: i + 1 }));
+
+      const userAnswer = await select<string | number>({
+        message: MessagesForCurrentLanguage.prompts["accept-which-summary"].text,
+        choices: [
+          { name: "-", value: "n" },
+          ...choices,
+          new Separator(),
+          { name: MessagesForCurrentLanguage.messages["combine-summaries"], value: "c" },
+          { name: MessagesForCurrentLanguage.messages["regenerate-summaries"], value: "r" },
+        ],
+        pageSize: 20,
+
+      });
       const answer = convertAnswerToDefault(
         MessagesForCurrentLanguage.prompts["accept-which-summary"],
-        userAnswer.trim().toLowerCase(),
-        userAnswer.trim().toLocaleLowerCase()
+        userAnswer.toString().trim().toLocaleLowerCase(),
+        userAnswer.toString().trim().toLocaleLowerCase()
       );
 
       switch (answer) {
@@ -57,12 +72,33 @@ export default async function generate(options: { all: boolean; verbose: boolean
           return;
         }
         case "c": {
-          const answer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text);
-          const numbers = answer.split(" ").join(",").split(",").map(s => s.trim()).filter(s => s.length > 0).map(n => parseInt(n));
+          // const answer = await input({ message: MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text });
+          const choices = commitMessages.map((s, i) => ({ name: `${i + 1}. ${s}`, value: i + 1 }));
+
+          let numbers: number[] = [];
+          numbers = await checkbox<number>({
+            message: MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text,
+            choices: [
+              { name: "0. Back", value: 0 },
+              ...choices,
+            ],
+            pageSize: 20
+
+            // validate: (answer: string | number) => {
+            //   if ((answer??"").toString().length === 0) {
+            //     return "Make a selection"
+            //   }
+            //   return true;
+            // }
+
+          });
+          if (numbers.length === 0 || numbers[0] === 0) {
+            break;
+          }
           const combined = numbers.map(n => commitMessages[n - 1]);
           const resummarized = await combineSummaries(openAiKey!, combined);
           console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
-          const userAcceptCombinedAnswer = await consoleHelpers.readline(MessagesForCurrentLanguage.prompts["accept-yes-no"].text);
+          const userAcceptCombinedAnswer = await input({ message: MessagesForCurrentLanguage.prompts["accept-yes-no"].text });
           const acceptCombinedAnswer = convertAnswerToDefault(
             MessagesForCurrentLanguage.prompts["accept-yes-no"],
             userAcceptCombinedAnswer.trim().toLowerCase(),

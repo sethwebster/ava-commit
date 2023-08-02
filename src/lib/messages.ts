@@ -1,4 +1,4 @@
-import { AvailableLanguages, LanguageLocales } from "./configure.js"
+import { AvailableLanguages, CliMessages, CliPossibleAnswers, CliPrompt, Messages } from "../types.js";
 import invariant from "./invariant.js";
 
 export function getLanguage() {
@@ -7,77 +7,6 @@ export function getLanguage() {
   return locale as AvailableLanguages;
 }
 
-type CliPossibleAnswers = {
-  "yes"?: string;
-  "no"?: string;
-  "combine"?: string;
-  "regenerate"?: string;
-  "none"?: string;
-  "open-ended"?: string;
-}
-
-type CliPrompt = {
-  text: string;
-  answers?: CliPossibleAnswers;
-}
-
-type CliMessages = {
-  prompts: {
-    "enter-openai-key": CliPrompt;
-    "unstaged-commits-confirm-add": CliPrompt;
-    "accept-which-summary": CliPrompt;
-    "combine-summaries-selection": CliPrompt;
-    "accept-yes-no": CliPrompt;
-    "update-now": CliPrompt;
-  },
-  messages: {
-    "staging-all-files": string;
-    "openai-key-required": string;
-    "using-cached-summaries": string;
-    "summaries-combined-confirmation": string;
-    "aborting-commit": string;
-    "selected-commit-message": string;
-    "welcome": string;
-    "description": string;
-    "openai-api-key-instructons": string;
-    "commit-message-options": string;
-    "ava-is-combining-summaries": string;
-    "ava-is-working": string;
-    "characters": string;
-    "words":  string;
-    "summarizing": string;
-    "summarized": string;
-    "summaries": string;
-    "diffs": string;
-    "update-available-header": string;
-    "update-available-body": string;
-    "run": string;
-    "to-update": string;
-    "update-confirmation": string;
-    "version": string;
-    "update-command-description": string;
-    "release-notes-command-description": string;
-    "configure-command-description": string;
-    "generate-command-description": string;
-    "option-all-description": string;
-    "option-verbose-description": string;
-    "option-length-description": string;
-    "option-configure-description": string;
-    "example-1": string;
-    "example-2": string;
-    "example-3": string;
-    "usage": string;
-    "display-help-for-a-command": string;
-    "display-version-information": string;
-  }
-  errors: {
-    "no-diff": string;
-  }
-}
-
-type Messages = {
-  [key in AvailableLanguages]: CliMessages | undefined;
-};
 
 const DEFAULT_CLI_POSSIBLE_ANSWERS: CliPossibleAnswers = {
   "yes": "y",
@@ -193,7 +122,7 @@ const Messages: Messages = {
         text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
       },
       "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >" },
-      "combine-summaries-selection": { text: "Enter the numbers of the commit messages to combine, separated by spaces > " },
+      "combine-summaries-selection": { text: "Select the options to combine:" },
       "accept-yes-no": { text: "Accept? (Y, n) > " },
       "update-now": { text: "Would you like to update now? (Y, n) > " },
     },
@@ -236,6 +165,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "Display help for a command",
       "display-version-information": "Display version information",
       "words": "words",
+      "regenerate-summaries": "Regenerate summaries",
+      "combine-summaries": "Combine summaries",
+      "select-summarize-diff-model": "Select the model to use for summarizing diffs",
+      "select-summarize-summaries-model": "Select the model to use for summarizing summaries",
+      "select-cli-language": "Select the language to use for the CLI",
+      "select-commit-message-language": "Select the language to use for commit messages",
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -319,6 +254,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "Muestra la ayuda para un comando",
       "display-version-information": "Muestra información de la versión",
       "words": "palabras",
+      "regenerate-summaries": "Regenerar resúmenes",
+      "combine-summaries": "Combinar resúmenes",
+      "select-summarize-diff-model": "Seleccione el modelo a utilizar para resumir las diferencias",
+      "select-summarize-summaries-model": "Seleccione el modelo a utilizar para resumir los resúmenes",
+      "select-cli-language": "Seleccione el idioma a utilizar para la CLI",
+      "select-commit-message-language": "Seleccione el idioma a utilizar para los mensajes de commit",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -352,7 +293,7 @@ const Messages: Messages = {
         }
       },
       "accept-which-summary": { text: "Accepter quel résumé ? #, [n]un, [c]ombiner, [r]égénérer >" },
-      "combine-summaries-selection": { text: "Entrez les numéros des messages de commit à combiner, séparés par des espaces > " },
+      "combine-summaries-selection": { text: "Sélectionnez les options à combiner:" },
       "accept-yes-no": {
         text: "Accepter ? (O)ui, (n)o > ", answers: {
           "yes": "O",
@@ -401,6 +342,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "Afficher l'aide pour une commande",
       "display-version-information": "Afficher les informations de version",
       "words": "mots",
+      "combine-summaries": "Combiner les résumés",
+      "regenerate-summaries": "Régénérer les résumés",
+      "select-summarize-diff-model": "Sélectionnez le modèle à utiliser pour résumer les différences",
+      "select-summarize-summaries-model": "Sélectionnez le modèle à utiliser pour résumer les résumés",
+      "select-cli-language": "Sélectionnez la langue à utiliser pour l'interface en ligne de commande",
+      "select-commit-message-language": "Sélectionnez la langue à utiliser pour les messages de commit",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -451,7 +398,7 @@ const Messages: Messages = {
         }
       },
       "accept-which-summary": { text: "Quale riepilogo vuoi accettare? (#, [n]essuno, [c]ombina, [r]igenera) >" },
-      "combine-summaries-selection": { text: "Inserisci i numeri dei messaggi di commit da combinare, separati da spazi > " },
+      "combine-summaries-selection": { text: "Seleziona le opzioni da combinare:" },
       "accept-yes-no": {
         text: "Accetti? (S)i, (n)o > ", answers: {
           "yes": "S",
@@ -499,6 +446,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "Visualizza l'aiuto per un comando",
       "display-version-information": "Visualizza le informazioni sulla versione",
       "words": "parole",
+      "combine-summaries": "Combina i riepiloghi",
+      "regenerate-summaries": "Rigenera i riepiloghi",
+      "select-summarize-diff-model": "Seleziona il modello da utilizzare per riassumere le differenze",
+      "select-summarize-summaries-model": "Seleziona il modello da utilizzare per riassumere i riepiloghi",
+      "select-cli-language": "Seleziona la lingua da utilizzare per la CLI",
+      "select-commit-message-language": "Seleziona la lingua da utilizzare per i messaggi di commit",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -530,7 +483,7 @@ const Messages: Messages = {
         }
       },
       "combine-summaries-selection": {
-        "text": "スペースで区切って結合するコミットメッセージの番号を入力してください > "
+        "text": "結合するオプションを選択してください:",
       },
       "accept-yes-no": {
         "text": "受け入れますか？ (はい, いいえ) > ",
@@ -586,6 +539,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "コマンドのヘルプを表示",
       "display-version-information": "バージョン情報を表示",
       "words": "単語",
+      "combine-summaries": "要約を結合",
+      "regenerate-summaries": "要約を再生成",
+      "select-summarize-diff-model": "差分の要約に使用するモデルを選択",
+      "select-summarize-summaries-model": "要約の要約に使用するモデルを選択",
+      "select-cli-language": "CLIに使用する言語を選択",
+      "select-commit-message-language": "コミットメッセージに使用する言語を選択",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -700,7 +659,7 @@ const Messages: Messages = {
         }
       },
       "combine-summaries-selection": {
-        "text": "Введите номера сообщений коммитов для объединения, разделенные пробелами > "
+        "text": "Выберите опции для объединения:",
       },
       "accept-yes-no": {
         "text": "Принимаете? (Да, нет) > ",
@@ -756,6 +715,12 @@ const Messages: Messages = {
       "display-help-for-a-command": "Показать помощь для команды",
       "display-version-information": "Показать информацию о версии",
       "words": "слова",
+      "combine-summaries": "Объединить сводки",
+      "regenerate-summaries": "Сформировать сводки",
+      "select-summarize-diff-model": "Выберите модель для сводки различий",
+      "select-summarize-summaries-model": "Выберите модель для сводки сводок",
+      "select-cli-language": "Выберите язык для CLI",
+      "select-commit-message-language": "Выберите язык для сообщений коммитов",
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",

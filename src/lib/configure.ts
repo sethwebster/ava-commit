@@ -1,13 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import Readline from 'readline';
 import { makeConfigPath } from './environment.js';
-import MessagesForCurrentLanguage from './messages.js';
+import MessagesForCurrentLanguage, { getLanguage } from './messages.js';
+import { input, select } from '@inquirer/prompts';
+import { AIModels, AvailableLanguages, Options, SupportedAIModelsType } from '../types.js';
 
 const DEFAULT_CONFIG: Options = {
   openAIApiKey: undefined,
-  model: "gpt-4",
+  summarizeDiffModel: "gpt-4",
+  summarizeSummariesModel: "gpt-4",
   cliLanguage: "en-US",
   commitMessageLanguage: "en-US",
 }
@@ -21,6 +23,15 @@ const welcomeMessages = [
 ]
 
 const welcomeMessage = welcomeMessages.join("\n");
+
+/*
+ {
+  openAIApiKey: string | undefined;
+  model: "gpt-4" | "gpt-3.5-turbo-16k";
+  cliLanguage: LanguageLocales
+  commitMessageLanguage: LanguageLocales;
+}
+*/
 
 function createConfigPath() {
   const configPath = makeConfigPath();
@@ -55,362 +66,55 @@ export function loadConfig(): Options {
   }
 }
 
+function languageChoices() {
+  const langs = AvailableLanguages.map(l => ({ name: l, value: l }));
+  const lang = getLanguage();
+  const index = langs.findIndex(l => l.value === lang);
+  if (index === -1) {
+    return langs;
+  }
+  const langObj = langs[index];
+  langs.splice(index, 1);
+  langs.unshift(langObj);
+  return langs;
+}
+
+function modelChoices(selected?: SupportedAIModelsType) {
+  const models =  Object.entries(AIModels).map(([key, value]) => ({ name: value.text, value: key, description: value.description }));
+  const index = models.findIndex(m => m.value === selected ?? "gpt-4");
+  if (index === -1) {
+    return models.map(m => (
+      { name: m.name, value: m.value, description: m.description }
+    ));
+  }
+  const model = models[index];
+  models.splice(index, 1);
+  models.unshift(model);
+  return models;
+}
+
 export async function configure(options: any) {
-  return new Promise<void>((resolve, reject) => {
-    console.log(welcomeMessage);
-    const existingConfig = loadConfig();
-    const rl = Readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-
-    rl.question(MessagesForCurrentLanguage.prompts['enter-openai-key'].text, (answer) => {
-      saveConfig({ ...existingConfig, openAIApiKey: answer });
-      resolve();
-    });
-  });
+  console.log(welcomeMessage);
+  const existingConfig = loadConfig();
+  const answers: Options = {
+    openAIApiKey: await input({ message: MessagesForCurrentLanguage.prompts['enter-openai-key'].text, default: existingConfig.openAIApiKey }),
+    summarizeDiffModel: await select({
+      message: MessagesForCurrentLanguage.messages["select-summarize-diff-model"],
+      choices: modelChoices(existingConfig.summarizeDiffModel),
+    }) as SupportedAIModelsType,
+    summarizeSummariesModel: await select({
+      message: MessagesForCurrentLanguage.messages["select-summarize-summaries-model"],
+      choices: modelChoices(existingConfig.summarizeSummariesModel),
+    }) as SupportedAIModelsType,
+    cliLanguage: await select({
+      message: MessagesForCurrentLanguage.messages["select-cli-language"],
+      choices: languageChoices(),
+    }),
+    commitMessageLanguage: await select({
+      message: MessagesForCurrentLanguage.messages["select-commit-message-language"],
+      choices: languageChoices(),
+    }),
+  }
+  saveConfig({ ...existingConfig, ...answers });
 }
 
-
-const AllLanguageLocales = [
-  "Cy-az-AZ",
-  "Cy-sr-SP",
-  "Cy-uz-UZ",
-  "Lt-az-AZ",
-  "Lt-sr-SP",
-  "Lt-uz-UZ",
-  "aa",
-  "ab",
-  "ae",
-  "af",
-  "af-ZA",
-  "ak",
-  "am",
-  "an",
-  "ar",
-  "ar-AE",
-  "ar-BH",
-  "ar-DZ",
-  "ar-EG",
-  "ar-IQ",
-  "ar-JO",
-  "ar-KW",
-  "ar-LB",
-  "ar-LY",
-  "ar-MA",
-  "ar-OM",
-  "ar-QA",
-  "ar-SA",
-  "ar-SY",
-  "ar-TN",
-  "ar-YE",
-  "as",
-  "av",
-  "ay",
-  "az",
-  "ba",
-  "be",
-  "be-BY",
-  "bg",
-  "bg-BG",
-  "bh",
-  "bi",
-  "bm",
-  "bn",
-  "bo",
-  "br",
-  "bs",
-  "ca",
-  "ca-ES",
-  "ce",
-  "ch",
-  "co",
-  "cr",
-  "cs",
-  "cs-CZ",
-  "cu",
-  "cv",
-  "cy",
-  "da",
-  "da-DK",
-  "de",
-  "de-AT",
-  "de-CH",
-  "de-DE",
-  "de-LI",
-  "de-LU",
-  "div-MV",
-  "dv",
-  "dz",
-  "ee",
-  "el",
-  "el-GR",
-  "en",
-  "en-AU",
-  "en-BZ",
-  "en-CA",
-  "en-CB",
-  "en-GB",
-  "en-IE",
-  "en-JM",
-  "en-NZ",
-  "en-PH",
-  "en-TT",
-  "en-US",
-  "en-ZA",
-  "en-ZW",
-  "eo",
-  "es",
-  "es-AR",
-  "es-BO",
-  "es-CL",
-  "es-CO",
-  "es-CR",
-  "es-DO",
-  "es-EC",
-  "es-ES",
-  "es-GT",
-  "es-HN",
-  "es-MX",
-  "es-NI",
-  "es-PA",
-  "es-PE",
-  "es-PR",
-  "es-PY",
-  "es-SV",
-  "es-UY",
-  "es-VE",
-  "et",
-  "et-EE",
-  "eu",
-  "eu-ES",
-  "fa",
-  "fa-IR",
-  "ff",
-  "fi",
-  "fi-FI",
-  "fj",
-  "fo",
-  "fo-FO",
-  "fr",
-  "fr-BE",
-  "fr-CA",
-  "fr-CH",
-  "fr-FR",
-  "fr-LU",
-  "fr-MC",
-  "fy",
-  "ga",
-  "gd",
-  "gl",
-  "gl-ES",
-  "gn",
-  "gu",
-  "gu-IN",
-  "gv",
-  "ha",
-  "he",
-  "he-IL",
-  "hi",
-  "hi-IN",
-  "ho",
-  "hr",
-  "hr-HR",
-  "ht",
-  "hu",
-  "hu-HU",
-  "hy",
-  "hy-AM",
-  "hz",
-  "ia",
-  "id",
-  "id-ID",
-  "ie",
-  "ig",
-  "ii",
-  "ik",
-  "io",
-  "is",
-  "is-IS",
-  "it",
-  "it-CH",
-  "it-IT",
-  "iu",
-  "ja",
-  "ja-JP",
-  "jv",
-  "ka",
-  "ka-GE",
-  "kg",
-  "ki",
-  "kj",
-  "kk",
-  "kk-KZ",
-  "kl",
-  "km",
-  "kn",
-  "kn-IN",
-  "ko",
-  "ko-KR",
-  "kr",
-  "ks",
-  "ku",
-  "kv",
-  "kw",
-  "ky",
-  "ky-KZ",
-  "la",
-  "lb",
-  "lg",
-  "li",
-  "ln",
-  "lo",
-  "lt",
-  "lt-LT",
-  "lu",
-  "lv",
-  "lv-LV",
-  "mg",
-  "mh",
-  "mi",
-  "mk",
-  "mk-MK",
-  "ml",
-  "mn",
-  "mn-MN",
-  "mr",
-  "mr-IN",
-  "ms",
-  "ms-BN",
-  "ms-MY",
-  "mt",
-  "my",
-  "na",
-  "nb",
-  "nb-NO",
-  "nd",
-  "ne",
-  "ng",
-  "nl",
-  "nl-BE",
-  "nl-NL",
-  "nn",
-  "nn-NO",
-  "no",
-  "nr",
-  "nv",
-  "ny",
-  "oc",
-  "oj",
-  "om",
-  "or",
-  "os",
-  "pa",
-  "pa-IN",
-  "pi",
-  "pl",
-  "pl-PL",
-  "ps",
-  "pt",
-  "pt-BR",
-  "pt-PT",
-  "qu",
-  "rm",
-  "rn",
-  "ro",
-  "ro-RO",
-  "ru",
-  "ru-RU",
-  "rw",
-  "sa",
-  "sa-IN",
-  "sc",
-  "sd",
-  "se",
-  "sg",
-  "si",
-  "sk",
-  "sk-SK",
-  "sl",
-  "sl-SI",
-  "sm",
-  "sn",
-  "so",
-  "sq",
-  "sq-AL",
-  "sr",
-  "ss",
-  "st",
-  "su",
-  "sv",
-  "sv-FI",
-  "sv-SE",
-  "sw",
-  "sw-KE",
-  "ta",
-  "ta-IN",
-  "te",
-  "te-IN",
-  "tg",
-  "th",
-  "th-TH",
-  "ti",
-  "tk",
-  "tl",
-  "tn",
-  "to",
-  "tr",
-  "tr-TR",
-  "ts",
-  "tt",
-  "tt-RU",
-  "tw",
-  "ty",
-  "ug",
-  "uk",
-  "uk-UA",
-  "ur",
-  "ur-PK",
-  "uz",
-  "ve",
-  "vi",
-  "vi-VN",
-  "vo",
-  "wa",
-  "wo",
-  "xh",
-  "yi",
-  "yo",
-  "za",
-  "zh",
-  "zh-CHS",
-  "zh-CHT",
-  "zh-CN",
-  "zh-HK",
-  "zh-MO",
-  "zh-SG",
-  "zh-TW",
-  "zu"
-] as const;
-
-export type LanguageLocales = typeof AllLanguageLocales[number];
-export const AvailableLanguages: LanguageLocales[] = [
-  "en-US",
-  "fr-FR",
-  "fr",
-  "fr-BE",
-  "fr-CA",
-  "fr-LU",
-  "fr-MC",
-  "it",
-  "it-CH",
-  "it-IT"
-] as LanguageLocales[]
-export type AvailableLanguages = typeof AvailableLanguages[number];
-
-interface Options {
-  openAIApiKey: string | undefined;
-  model: "gpt-4" | "gpt-3.5-turbo-16k";
-  cliLanguage: LanguageLocales
-  commitMessageLanguage: LanguageLocales;
-}

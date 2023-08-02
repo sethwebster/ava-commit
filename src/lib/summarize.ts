@@ -7,6 +7,7 @@ import MessagesForCurrentLanguage from './messages.js';
 import { countWords } from 'alfaaz';
 import { ChainValues } from 'langchain/schema';
 import promptTemplates from './promptTemplates.js';
+import { loadConfig } from './configure.js';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -19,10 +20,11 @@ var chalkAnimation: { rainbow: (text: string) => Animation; };
 })();
 
 async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boolean): Promise<string> {
+  const config = loadConfig();
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: MODELS.gpt35,
+    modelName: config.summarizeDiffModel,
     maxTokens: -1,
   });
 
@@ -59,11 +61,12 @@ async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boole
  * @returns A string combined from the LLM
  */
 export async function combineSummaries(openAiApiKey: string, summaries: string[]): Promise<string> {
+  const config = loadConfig();
   const rainbow = chalkAnimation.rainbow(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} 0 characters`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: MODELS.gpt4,
+    modelName: config.summarizeSummariesModel,
     maxTokens: -1,
     streaming: true,
   });
@@ -100,12 +103,13 @@ export async function summarizeDiffs(openAiApiKey: string, diffs: string[], verb
 }
 
 export async function summarizeSummaries(openAiApiKey: string, summaries: string[], maxLength: number, verbose?: boolean): Promise<string[]> {
+  const config = loadConfig();
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: openAiApiKey,
-    modelName: MODELS.gpt4,
+    modelName: config.summarizeSummariesModel,
     maxTokens: -1,
     streaming: true,
   });

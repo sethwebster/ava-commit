@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import git from "./git.js";
-import consoleHelpers from "./consoleHelpers.js";
 import { convertAnswerToDefault } from "./messages.js";
 import MessagesForCurrentLanguage from "./messages.js";
+import { input } from "@inquirer/prompts";
 
 export default async function checkStagedCommits(options: { all: boolean } = { all: false }) {
   const status = git.status({ short: true });
@@ -18,7 +18,8 @@ export default async function checkStagedCommits(options: { all: boolean } = { a
   }
 
   if (status.filter(s => s.type === "unknown" || s.type === "modified-partly-staged").length > 0) {
-    const userAnswer = await consoleHelpers.readline(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text));
+    const userAnswer = await input({message: chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text)});
+    // await consoleHelpers.readline(chalk.yellow(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"].text));
     const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["unstaged-commits-confirm-add"], userAnswer.trim().toLowerCase(), "y");
     if (answer === "y" || answer.trim().length === 0) {
       console.log(MessagesForCurrentLanguage.messages["staging-all-files"])
