@@ -17,28 +17,69 @@ npm install @sethwebster/ava-commit
 ```bash
 ava-commit [options]
 ```
+## Commands and Options
 
-### Options
+| Command         | Options           | Explanation                                                                                          |
+|-----------------|-------------------|------------------------------------------------------------------------------------------------------|
+| `update`        | None              | Checks for updates                                                                                   |
+| `release-notes` | None              | Generates release notes based on what's changed since the most recent tag                            |
+| `configure`     | None              | Configures the tool                                                                                  |
+| `generate`      | `-a, --all`       | Generates a commit message for all commits, not just staged                                          |
+|                 | `-v, --verbose`   | Generates a commit message with verbose output                                                       |
+|                 | `-l, --length`    | Generates a commit message with a targeted max summary length. Default is 80 characters if not set.  |
+|                 | `--all`           | Generates a commit message for all files, bypassing the check for staged files                       |
+|                 | `--length`        | Generates a commit message targeting a specific max summary of characters                            |
 
-| Option        | Description       | Default Value |
-| :---          |    :----:   |  ---: |
-| -a, --all     | Generate commit messages for all commits, not just staged. | False |
-| -v, --verbose | Outputs more detailed information about the process. | False |
-| -l, --length [number] | The length of the generated commit message. The tool will do its best to generate a message within this length. | 80 |
-| --configure | Launches a setup process to configure the tool. |  |
+#### Examples 
 
-#### Example 
+To update the tool:
 
 ```bash
-ava-commit --all --verbose
+ava-commit update
+```
+
+To generate release notes:
+
+```bash
+ava-commit release-notes
+```
+
+To configure the tool:
+
+```bash
+ava-commit configure
+```
+
+To generate a commit message with all defaults for staged files:
+
+```bash
+ava-commit generate
+```
+
+To generate a commit message for all commits, not just staged:
+
+```bash
+ava-commit generate --all
+```
+
+To generate a verbose commit message:
+
+```bash
+ava-commit generate --verbose
+```
+
+To generate a commit message with a targeted max summary length:
+
+```bash
+ava-commit generate --length 150
 ```
 
 ## Configuration
 
-To configure ava-commit, you can use the `--configure` option. This will guide you through a series of prompts to customize the tool's settings according to your needs. This flow will run automatically the first time you run the `ava-commit`.
+To configure ava-commit, you can use the `configure` command. This will guide you through a series of prompts to customize the tool's settings according to your needs. This flow will run automatically the first time you run the `ava-commit`.
 
 ## Recommendations
-1. **Alias** -  Personally, I use an alias in my `.zshrc` of `ac` to streamline. It works well with my workflow to set the `--all` option on my alias as I generally don't do half-commits. Hopefully you don't miss the "[Active Time Accounting (ac)](https://man7.org/linux/man-pages/man7/man-pages.7.html)" tool too much. 🤪
+1. **Alias** -  Personally, I use an alias in my `.zshrc` of `ac` to streamline. It works well with my workflow to set the `generate --all` option on my alias as I generally don't do half-commits. Hopefully you don't miss the "[Active Time Accounting (ac)](https://man7.org/linux/man-pages/man7/man-pages.7.html)" tool too much. 🤪
 2. **Workflow** - This is a general workflow suggestion but working in smaller changes leads to better results. While Ava _can_ figure out larger commit sets it gets harder the larger the set is.
 
 ## Limitations
