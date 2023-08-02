@@ -53,6 +53,21 @@ type CliMessages = {
     "run": string;
     "to-update": string;
     "update-confirmation": string;
+    "version": string;
+    "update-command-description": string;
+    "release-notes-command-description": string;
+    "configure-command-description": string;
+    "generate-command-description": string;
+    "option-all-description": string;
+    "option-verbose-description": string;
+    "option-length-description": string;
+    "option-configure-description": string;
+    "example-1": string;
+    "example-2": string;
+    "example-3": string;
+    "usage": string;
+    "display-help-for-a-command": string;
+    "display-version-information": string;
   }
   errors: {
     "no-diff": string;
@@ -204,6 +219,21 @@ const Messages: Messages = {
       "run": "Run",
       "to-update": "to update",
       "update-confirmation": "The following packages have been updated: ",
+      "version": "Version",
+      "update-command-description": "Check for updates",
+      "release-notes-command-description": "Generates release notes based on what's changed since the most recent tag",
+      "configure-command-description": "Configure the tool",
+      "generate-command-description": "Generate a commit message",
+      "option-all-description": "All commits, not just staged",
+      "option-verbose-description": "Verbose output",
+      "option-length-description": "Length of commit message",
+      "option-configure-description": "Configure the tool",
+      "example-1": "$ ava-commit generate                # create a commit message for staged files with all defaults",
+      "example-2": "$ ava-commit generate --all          # create a commit message for staged files, bypassing the check for staged files",
+      "example-3": "$ ava-commit generate --length 150   # create a commit message for staged files, targeting max summary of 150 characters",
+      "usage": "command [options]",
+      "display-help-for-a-command": "Display help for a command",
+      "display-version-information": "Display version information",
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -271,6 +301,21 @@ const Messages: Messages = {
       "update-confirmation": "Los siguientes paquetes se han actualizado:",
       "commit-message-options": "Opciones del mensaje de commit:",
       "openai-api-key-instructons": "Para utilizar esta herramienta, necesitará una clave de API de OpenAI. Puede obtener una aquí: 🔗 https://platform.openai.com/account/api-keys",
+      "version": "Version",
+      "update-command-description": "Comprueba si hay actualizaciones",
+      "release-notes-command-description": "Genera notas de lanzamiento basadas en lo que ha cambiado desde la etiqueta más reciente",
+      "configure-command-description": "Configura la herramienta",
+      "generate-command-description": "Genera un mensaje de commit",
+      "option-all-description": "Todos los commits, no solo los preparados",
+      "option-verbose-description": "Salida detallada",
+      "option-length-description": "Longitud del mensaje de commit",
+      "option-configure-description": "Configura la herramienta",
+      "example-1": "$ ava-commit generate                # crea un mensaje de commit para los archivos preparados con todos los valores predeterminados",
+      "example-2": "$ ava-commit generate --all          # crea un mensaje de commit para los archivos preparados, omitiendo la comprobación de archivos preparados",
+      "example-3": "$ ava-commit generate --length 150   # crea un mensaje de commit para los archivos preparados, apuntando a un resumen máximo de 150 caracteres",
+      "usage": "comando [opciones]",
+      "display-help-for-a-command": "Muestra la ayuda para un comando",
+      "display-version-information": "Muestra información de la versión",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -336,7 +381,22 @@ const Messages: Messages = {
       "update-available-body": "est obsolète. La dernière version est",
       "run": "Exécutez",
       "to-update": "pour mettre à jour",
-      "update-confirmation": "Les packages suivants ont été mis à jour :"
+      "update-confirmation": "Les packages suivants ont été mis à jour :",
+      "version": "Version",
+      "update-command-description": "Vérifiez les mises à jour",
+      "release-notes-command-description": "Génère les notes de version en fonction de ce qui a changé depuis la dernière étiquette",
+      "configure-command-description": "Configurez l'outil",
+      "generate-command-description": "Génère un message de commit",
+      "option-all-description": "Tous les commits, pas seulement indexés",
+      "option-verbose-description": "Sortie détaillée",
+      "option-length-description": "Longueur du message de commit",
+      "option-configure-description": "Configurez l'outil",
+      "example-1": "$ ava-commit generate                # crée un message de commit pour les fichiers indexés avec toutes les valeurs par défaut",
+      "example-2": "$ ava-commit generate --all          # crée un message de commit pour les fichiers indexés, en contournant la vérification des fichiers indexés",
+      "example-3": "$ ava-commit generate --length 150   # crée un message de commit pour les fichiers indexés, ciblant un résumé maximal de 150 caractères",
+      "usage": "commande [options]",
+      "display-help-for-a-command": "Afficher l'aide pour une commande",
+      "display-version-information": "Afficher les informations de version",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -418,7 +478,22 @@ const Messages: Messages = {
       "update-available-body": "è obsoleto. L'ultima versione è",
       "run": "Esegui",
       "to-update": "per aggiornare",
-      "update-confirmation": "I seguenti pacchetti sono stati aggiornati:"
+      "update-confirmation": "I seguenti pacchetti sono stati aggiornati:",
+      "version": "Versione",
+      "update-command-description": "Controlla gli aggiornamenti",
+      "release-notes-command-description": "Genera le note di rilascio in base a ciò che è cambiato dalla tag più recente",
+      "configure-command-description": "Configura lo strumento",
+      "generate-command-description": "Genera un messaggio di commit",
+      "option-all-description": "Tutti i commit, non solo quelli in stage",
+      "option-verbose-description": "Output dettagliato",
+      "option-length-description": "Lunghezza del messaggio di commit",
+      "option-configure-description": "Configura lo strumento",
+      "example-1": "$ ava-commit generate                # crea un messaggio di commit per i file in stage con tutti i valori predefiniti",
+      "example-2": "$ ava-commit generate --all          # crea un messaggio di commit per i file in stage, bypassando il controllo dei file in stage",
+      "example-3": "$ ava-commit generate --length 150   # crea un messaggio di commit per i file in stage, puntando a un riepilogo massimo di 150 caratteri",
+      "usage": "command [options]",
+      "display-help-for-a-command": "Visualizza l'aiuto per un comando",
+      "display-version-information": "Visualizza le informazioni sulla versione",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
