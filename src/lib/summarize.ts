@@ -97,7 +97,7 @@ export async function combineSummaries(openAiApiKey: string, summaries: string[]
     handleLLMNewToken: (token) => {
       summaryText += token;
       const wordCount = countWords(summaryText);
-      (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} ${wordCount} ${MessagesForCurrentLanguage.messages['words']}}`);
+      (rainbow as Animation).replace(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} ${wordCount} ${MessagesForCurrentLanguage.messages['words']}`);
     }
   }]);
   console.log();
