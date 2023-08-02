@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { Animation } from 'chalk-animation';
 import MessagesForCurrentLanguage from './messages.js';
 import { countWords } from 'alfaaz';
+import { ChainValues } from 'langchain/schema';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -35,7 +36,7 @@ async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boole
     {diff}
     
     Summary:`,
-  }); 
+  });
 
   const chain = new LLMChain({
     llm: model,
@@ -43,9 +44,24 @@ async function summarizeDiff(openAiApiKey: string, diff: string, verbose?: boole
     verbose: verbose,
   });
 
-  const summary = await chain.call({ diff });
-  process.stdout.write(".");
-  return summary.text;
+  let interval: NodeJS.Timeout | null = null;
+  try {
+    const summary = await new Promise<ChainValues>(async (resolve, reject) => {
+      interval = setTimeout(() => {
+        reject("Promise timed out");
+      }, 10000);
+      const result = await chain.call({ diff });
+      resolve(result);
+    });
+    process.stdout.write(".");
+    return summary.text;
+  } catch (e) {
+    return "Unable to summarize this one diff";
+  } finally {
+    if (interval) {
+      clearTimeout(interval);
+    }
+  }
 }
 
 /**

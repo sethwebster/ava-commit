@@ -15,7 +15,9 @@ async function start() {
     .addCommand(new Command("update").description(MessagesForCurrentLanguage.messages["update-command-description"]).action(() => {
       doAutoUpdate();
     }))
-    .addCommand(new Command("release-notes").description(MessagesForCurrentLanguage.messages["release-notes-command-description"]).action((options) => createReleaseNotes(options)))
+    .addCommand(new Command("release-notes").description(MessagesForCurrentLanguage.messages["release-notes-command-description"])
+      .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false)
+      .action((options) => createReleaseNotes(options)))
     .addCommand(new Command("configure").description(MessagesForCurrentLanguage.messages["configure-command-description"]).action((options) => configure(options)))
     .addCommand(new Command("generate").description(MessagesForCurrentLanguage.messages["generate-command-description"])
       .option("-a,--all", MessagesForCurrentLanguage.messages["option-all-description"], false)
