@@ -172,6 +172,7 @@ const Messages: Messages = {
       "select-cli-language": "Select the language to use for the CLI",
       "select-commit-message-language": "Select the language to use for commit messages",
       "option-push-description": "Push to remote after commit",
+      "update-package-version": "The version in your package.json is the same or lower than the latest tagged version. Please update your package.json version to match the latest tag.",
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -262,6 +263,7 @@ const Messages: Messages = {
       "select-cli-language": "Seleccione el idioma a utilizar para la CLI",
       "select-commit-message-language": "Seleccione el idioma a utilizar para los mensajes de commit",
       "option-push-description": "Empuja a remoto después del commit",
+      "update-package-version": "La versión en su package.json es la misma o inferior a la última versión etiquetada. Actualice la versión de su package.json para que coincida con la última etiqueta.",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -351,6 +353,7 @@ const Messages: Messages = {
       "select-cli-language": "Sélectionnez la langue à utiliser pour l'interface en ligne de commande",
       "select-commit-message-language": "Sélectionnez la langue à utiliser pour les messages de commit",
       "option-push-description": "Pousser vers la télécommande après le commit",
+      "update-package-version": "La version de votre package.json est identique ou inférieure à la dernière version étiquetée. Veuillez mettre à jour la version de votre package.json pour qu'elle corresponde à la dernière étiquette.",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -456,6 +459,7 @@ const Messages: Messages = {
       "select-cli-language": "Seleziona la lingua da utilizzare per la CLI",
       "select-commit-message-language": "Seleziona la lingua da utilizzare per i messaggi di commit",
       "option-push-description": "Esegui push sul remoto dopo il commit",
+      "update-package-version": "La versione del tuo package.json è uguale o inferiore all'ultima versione taggata. Aggiorna la versione del tuo package.json per corrispondere all'ultimo tag.",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -545,6 +549,7 @@ const Messages: Messages = {
       "select-cli-language": "CLIに使用する言語を選択",
       "select-commit-message-language": "コミットメッセージに使用する言語を選択",
       "option-push-description": "コミット後にリモートにプッシュ",
+      "update-package-version": "package.jsonのバージョンが最新のタグと同じかそれよりも低いです。package.jsonのバージョンを最新のタグと一致するように更新してください。",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -721,7 +726,8 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Выберите модель для сводки сводок",
       "select-cli-language": "Выберите язык для CLI",
       "select-commit-message-language": "Выберите язык для сообщений коммитов",
-      "option-push-description": "Пушить в удаленный после коммита",      
+      "option-push-description": "Пушить в удаленный после коммита",
+      "update-package-version": "Версия вашего package.json совпадает или ниже последней тегированной версии. Пожалуйста, обновите версию вашего package.json, чтобы она соответствовала последнему тегу.",
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",
@@ -774,7 +780,92 @@ const Messages: Messages = {
   "ty": undefined,
   "ug": undefined,
   "uk-UA": undefined,
-  "uk": undefined,
+  "uk": {
+    "prompts": {
+      "enter-openai-key": {
+        "text": "Введіть ключ API OpenAI > ",
+        "answers": {}
+      },
+      "unstaged-commits-confirm-add": {
+        "text": "У вас є незакомічені коміти. Хочете закомітити їх перед генерацією повідомлень коміту? (Т)ак, (н)і > ",
+        "answers": {
+          "yes": "Т",
+          "no": "н"
+        }
+      },
+      "accept-which-summary": {
+        "text": "Яке резюме ви хочете прийняти?"
+      },
+      "combine-summaries-selection": {
+        "text": "Введіть номери повідомлень коміту, які слід об'єднати, розділених пробілами > "
+      },
+      "accept-yes-no": {
+        "text": "Прийняти? (Т)ак, (н)і > ",
+        "answers": {
+          "yes": "Т",
+          "no": "н"
+        }
+      },
+      "update-now": {
+        "text": "Бажаєте оновити зараз? (Т)ак, (н)і > ",
+        "answers": {
+          "yes": "Т",
+          "no": "н"
+        }
+      }
+    },
+    "messages": {
+      "staging-all-files": "Підготовка всіх файлів...",
+      "openai-key-required": "Ви повинні встановити змінну середовища OPENAI_API_KEY або запустити ava-commit --configure",
+      "using-cached-summaries": "Використання кешованих резюме та повідомлень коміту з попереднього запуску.",
+      "summaries-combined-confirmation": "Комбіноване повідомлення коміту:",
+      "aborting-commit": "Переривання коміту",
+      "selected-commit-message": "Вибране повідомлення коміту: ",
+      "welcome": "Ласкаво просимо до {name}, генератора повідомлень коміту на основі ШІ.",
+      "description": "Цей інструмент допоможе вам писати кращі повідомлення коміту.",
+      "ava-is-combining-summaries": "Ava об'єднує {summaryCount} резюме...",
+      "ava-is-working": "Ava працює...",
+      "characters": "символів",
+      "summarizing": "Резюмування",
+      "summarized": "Резюмовано",
+      "summaries": "резюме",
+      "diffs": "різниці",
+      "update-available-header": "Доступне оновлення",
+      "update-available-body": "застаріло. Остання версія є",
+      "run": "Запустити",
+      "to-update": "щоб оновити",
+      "update-confirmation": "Наступні пакети було оновлено:",
+      "commit-message-options": "Опції повідомлень коміту:",
+      "openai-api-key-instructons": "Щоб використовувати цей інструмент, вам потрібен ключ API OpenAI. Ви можете отримати його тут: 🔗 https://platform.openai.com/account/api-keys",
+      "version": "Версія",
+      "update-command-description": "Перевіряє наявність оновлень",
+      "release-notes-command-description": "Генерує примітки до релізу на основі змін з моменту останньої мітки",
+      "configure-command-description": "Налаштувати інструмент",
+      "generate-command-description": "Генерує повідомлення коміту",
+      "option-all-description": "Bci коміти, не тільки підготовлені",
+      "option-verbose-description": "Докладний вивід",
+      "option-length-description": "Довжина повідомлення коміту",
+      "option-configure-description": "Налаштувати інструмент",
+      "example-1": "$ ava-commit generate # створює повідомлення коміту для підготовлених файлів з усіма типовими значеннями",
+      "example-2": "$ ava-commit generate --all # створює повідомлення коміту для підготовлених файлів, оминувши перевірку підготовлених файлів",
+      "example-3": "$ ava-commit generate --length 150 # створює повідомлення коміту для підготовлених файлів, маючи на меті максимальне резюме у 150 символів",
+      "usage": "команда [опції]",
+      "display-help-for-a-command": "Показати довідку для команди",
+      "display-version-information": "Показати інформацію про версію",
+      "words": "слів",
+      "regenerate-summaries": "Регенерувати резюме",
+      "combine-summaries": "Об'єднати резюме",
+      "select-summarize-diff-model": "Виберіть модель для резюмування різниці",
+      "select-summarize-summaries-model": "Виберіть модель для резюмування резюме",
+      "select-cli-language": "Виберіть мову для використання в CLI",
+      "select-commit-message-language": "Виберіть мову для повідомлень коміту",
+      "option-push-description": "Пуш на віддалений сервер після коміту",
+      "update-package-version": "Версія у вашому package.json така сама або нижча, ніж остання помічена версія. Оновіть версію вашого package.json, щоб вона співпадала з останньою міткою."
+    },
+    "errors": {
+      "no-diff": "Немає змін для коміту"
+    }
+  },
   "ur-PK": undefined,
   "ur": undefined,
   "uz": undefined,
@@ -812,6 +903,7 @@ propagateMessagesToOtherSimilarLanguageLocales(Messages["it"] as CliMessages, "i
 propagateMessagesToOtherSimilarLanguageLocales(Messages["es"] as CliMessages, "es");
 propagateMessagesToOtherSimilarLanguageLocales(Messages["ru"] as CliMessages, "ru");
 propagateMessagesToOtherSimilarLanguageLocales(Messages["ja"] as CliMessages, "ja");
+propagateMessagesToOtherSimilarLanguageLocales(Messages["uk"] as CliMessages, "uk");
 
 const lang = getLanguage();
 

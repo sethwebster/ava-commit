@@ -433,6 +433,7 @@ export type CliMessages = {
     "select-summarize-summaries-model": string;
     "select-cli-language": string;
     "select-commit-message-language": string;
+    "update-package-version": string;
   }
   errors: {
     "no-diff": string;

@@ -9,6 +9,7 @@ import { LLMChain } from "langchain/chains";
 import { compareVersions } from 'compare-versions';
 import { countWords } from "alfaaz";
 import promptTemplates from "./promptTemplates.js";
+import packageJson from "./packageJson.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -23,11 +24,13 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     return;
   }
   await git.fetch({ all: true });
-  const tags = (await git.tags()).sort((a, b) => {
-    return compareVersions(a, b);
-  }).reverse();
-  const latest = tags.shift();
-  console.log("+++ " + latest);
+  const latest = await getLatestTaggedVersion();
+  const localPackageVersion = packageJson.packageVersion();
+  console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
+  if (latest === localPackageVersion) {
+    // Versions match, we should prompt the user to update
+    console.log(MessagesForCurrentLanguage.messages['update-package-version']);
+  }
   const diffs = await git.diff({ baseCompare: latest, compare: "HEAD" });
   const summaries = await summarizeDiffs(config.openAIApiKey, diffs, verbose);
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
@@ -58,4 +61,12 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     }
   ]) as { text: string; };
   console.log(summary.text);
+}
+
+async function getLatestTaggedVersion() {
+  const tags = (await git.tags()).sort((a, b) => {
+    return compareVersions(a, b);
+  }).reverse();
+  const latest = tags.shift();
+  return latest;
 }

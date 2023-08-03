@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
 import * as url from 'url';
+
 function loadPackageJson() {
   const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
   const packageJson = fs.readFileSync(`${__dirname}../../package.json`);

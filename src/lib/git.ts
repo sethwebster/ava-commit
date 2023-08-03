@@ -45,8 +45,19 @@ async function diff(options?: DiffOptions) {
 
 async function fetch({ all }: { all?: boolean } = {}) {
   return new Promise((resolve, reject) => {
-    const fetchResult = spawn("git", ["fetch", all ? "--all" : ""]);
-    return resolve(fetchResult);
+    try {
+      const fetchResult = spawn("git", ["fetch", all ? "--all" : ""]);
+      return resolve(fetchResult);
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e.message.includes("[new tag]")) {
+          // this is OK
+          resolve(e.message);
+        } else {
+          throw e;
+        }
+      }
+    }
   });
 }
 
