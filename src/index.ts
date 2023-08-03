@@ -23,6 +23,7 @@ async function start() {
     .addCommand(new Command("generate").description(MessagesForCurrentLanguage.messages["generate-command-description"])
       .option("-a,--all", MessagesForCurrentLanguage.messages["option-all-description"], false)
       .option('-v,--verbose', MessagesForCurrentLanguage.messages["option-verbose-description"], false)
+      .option("-p, --push", MessagesForCurrentLanguage.messages["option-push-description"], false)
       .option<number>('-l,--length [number]', MessagesForCurrentLanguage.messages["option-length-description"], (val, prev) => {
         return parseInt(val);
       }, 80)

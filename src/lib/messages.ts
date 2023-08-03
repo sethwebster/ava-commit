@@ -171,6 +171,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Select the model to use for summarizing summaries",
       "select-cli-language": "Select the language to use for the CLI",
       "select-commit-message-language": "Select the language to use for commit messages",
+      "option-push-description": "Push to remote after commit",
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -260,6 +261,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Seleccione el modelo a utilizar para resumir los resúmenes",
       "select-cli-language": "Seleccione el idioma a utilizar para la CLI",
       "select-commit-message-language": "Seleccione el idioma a utilizar para los mensajes de commit",
+      "option-push-description": "Empuja a remoto después del commit",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -348,6 +350,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Sélectionnez le modèle à utiliser pour résumer les résumés",
       "select-cli-language": "Sélectionnez la langue à utiliser pour l'interface en ligne de commande",
       "select-commit-message-language": "Sélectionnez la langue à utiliser pour les messages de commit",
+      "option-push-description": "Pousser vers la télécommande après le commit",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -452,6 +455,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Seleziona il modello da utilizzare per riassumere i riepiloghi",
       "select-cli-language": "Seleziona la lingua da utilizzare per la CLI",
       "select-commit-message-language": "Seleziona la lingua da utilizzare per i messaggi di commit",
+      "option-push-description": "Esegui push sul remoto dopo il commit",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -540,6 +544,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "要約の要約に使用するモデルを選択",
       "select-cli-language": "CLIに使用する言語を選択",
       "select-commit-message-language": "コミットメッセージに使用する言語を選択",
+      "option-push-description": "コミット後にリモートにプッシュ",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -716,6 +721,7 @@ const Messages: Messages = {
       "select-summarize-summaries-model": "Выберите модель для сводки сводок",
       "select-cli-language": "Выберите язык для CLI",
       "select-commit-message-language": "Выберите язык для сообщений коммитов",
+      "option-push-description": "Пушить в удаленный после коммита",      
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",

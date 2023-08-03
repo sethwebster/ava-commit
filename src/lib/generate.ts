@@ -8,7 +8,7 @@ import { combineSummaries, summarizeDiffs, summarizeSummaries } from "./summariz
 import displayOptions from "./displayOptions.js";
 import { Separator, checkbox, input, select } from "@inquirer/prompts";
 
-export default async function generate(options: { all: boolean; verbose: boolean; length: number; releaseNotes: boolean; noCache?: boolean }) {
+export default async function generate(options: { all: boolean; verbose: boolean; length: number; releaseNotes: boolean; noCache?: boolean; push?: boolean }) {
   const { all, verbose, length, releaseNotes, noCache } = options;
   const existingConfig = loadConfig();
   const envOpenAiKey = process.env.OPENAI_API_KEY ?? undefined;
@@ -106,6 +106,10 @@ export default async function generate(options: { all: boolean; verbose: boolean
           );
           if (acceptCombinedAnswer === "y" || acceptCombinedAnswer.trim().length === 0) {
             git.commit(resummarized);
+            if (options.push) {
+              const res = await git.push();
+              console.log(res);
+            }
             cache.deletePreviousRun(diffs);
             done = true;
           }
@@ -128,6 +132,10 @@ export default async function generate(options: { all: boolean; verbose: boolean
           const commitMessage = commitMessages[parseInt(answer) - 1];
           console.log(MessagesForCurrentLanguage.messages['selected-commit-message'], commitMessage)
           git.commit(commitMessage);
+          if (options.push) {
+            const res = await git.push();
+            console.log(res);
+          }
           cache.deletePreviousRun(diffs);
           done = true;
           break;

@@ -70,6 +70,11 @@ async function commit(commitMessage: string) {
   return commitResult;
 }
 
+async function push() {
+  const pushResult = spawn("git", ["push"]);
+  return pushResult;
+}
+
 function status(options?: { short?: boolean } | undefined): GitStatusEntry[] {
   const statusResult = spawn("git", ["status", options?.short ? "--short" : ""]);
   if (!statusResult) return [];
@@ -105,6 +110,7 @@ const git = {
   status,
   currentBranch,
   fetch,
+  push,
   tags,
 }
 

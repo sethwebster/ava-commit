@@ -420,6 +420,7 @@ export type CliMessages = {
     "option-verbose-description": string;
     "option-length-description": string;
     "option-configure-description": string;
+    "option-push-description": string;
     "example-1": string;
     "example-2": string;
     "example-3": string;
