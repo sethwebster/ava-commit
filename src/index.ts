@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Argument, Command } from 'commander';
 import { configure } from './lib/configure.js';
 import packageJson from './lib/packageJson.js';
