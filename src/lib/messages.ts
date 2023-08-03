@@ -121,7 +121,7 @@ const Messages: Messages = {
       "unstaged-commits-confirm-add": {
         text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
       },
-      "accept-which-summary": { text: "Accept which summary? (#, [n]one, [c]ombine, [r]egenerate) >" },
+      "accept-which-summary": { text: "Accept which summary?" },
       "combine-summaries-selection": { text: "Select the options to combine:" },
       "accept-yes-no": { text: "Accept? (Y, n) > " },
       "update-now": { text: "Would you like to update now? (Y, n) > " },
@@ -205,7 +205,7 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "¿Qué resumen desea aceptar? (#, [n]inguno, [c]ombinar, [r]egenerar) >" },
+      "accept-which-summary": { text: "¿Qué resumen desea aceptar?" },
       "combine-summaries-selection": { text: "Introduzca los números de los mensajes de commit a combinar, separados por espacios > " },
       "accept-yes-no": {
         text: "¿Aceptar? (S)i, (n)o > ", answers: {
@@ -292,7 +292,7 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "Accepter quel résumé ? #, [n]un, [c]ombiner, [r]égénérer >" },
+      "accept-which-summary": { text: "Accepter quel résumé ?" },
       "combine-summaries-selection": { text: "Sélectionnez les options à combiner:" },
       "accept-yes-no": {
         text: "Accepter ? (O)ui, (n)o > ", answers: {
@@ -397,7 +397,7 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "Quale riepilogo vuoi accettare? (#, [n]essuno, [c]ombina, [r]igenera) >" },
+      "accept-which-summary": { text: "Quale riepilogo vuoi accettare?" },
       "combine-summaries-selection": { text: "Seleziona le opzioni da combinare:" },
       "accept-yes-no": {
         text: "Accetti? (S)i, (n)o > ", answers: {
@@ -475,12 +475,7 @@ const Messages: Messages = {
         }
       },
       "accept-which-summary": {
-        "text": "どの要約を受け入れますか？ (#, [な]し, [結]合, [再]生成) > ",
-        "answers": {
-          "none": "な",
-          "combine": "結",
-          "regenerate": "再"
-        }
+        "text": "どの要約を受け入れますか",
       },
       "combine-summaries-selection": {
         "text": "結合するオプションを選択してください:",
@@ -651,7 +646,7 @@ const Messages: Messages = {
         }
       },
       "accept-which-summary": {
-        "text": "Какую сводку принять? (#, [н]икакую, [с]оединить, [р]егенерировать) >",
+        "text": "Какую сводку принять?",
         "answers": {
           "none": "н",
           "combine": "с",
