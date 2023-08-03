@@ -386,6 +386,7 @@ export type CliMessages = {
     "combine-summaries-selection": CliPrompt;
     "accept-yes-no": CliPrompt;
     "update-now": CliPrompt;
+    "offer-automatic-package-bump": CliPrompt;
   },
   messages: {
     "staging-all-files": string;
@@ -434,6 +435,10 @@ export type CliMessages = {
     "select-cli-language": string;
     "select-commit-message-language": string;
     "update-package-version": string;
+    "select-version-update-type": string;
+    "patch": string;
+    "minor": string;
+    "major": string;    
   }
   errors: {
     "no-diff": string;

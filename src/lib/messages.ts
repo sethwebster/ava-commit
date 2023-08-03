@@ -125,6 +125,12 @@ const Messages: Messages = {
       "combine-summaries-selection": { text: "Select the options to combine:" },
       "accept-yes-no": { text: "Accept? (Y, n) > " },
       "update-now": { text: "Would you like to update now? (Y, n) > " },
+      "offer-automatic-package-bump": {
+        text: "Do you want to update the package version? (Y, n) > ", answers: {
+          "yes": "Y",
+          "no": "n",
+        }
+      },
     },
     messages: {
       "staging-all-files": "Staging all files...",
@@ -173,6 +179,12 @@ const Messages: Messages = {
       "select-commit-message-language": "Select the language to use for commit messages",
       "option-push-description": "Push to remote after commit",
       "update-package-version": "The version in your package.json is the same or lower than the latest tagged version. Please update your package.json version to match the latest tag.",
+      "select-version-update-type": "Select version update type:",
+      // Version update types
+      "major": "Major",
+      "minor": "Minor",
+      "patch": "Patch",
+
     },
     errors: {
       "no-diff": "No changes to commit",
@@ -216,6 +228,12 @@ const Messages: Messages = {
         }
       },
       "update-now": { text: "¿Desea actualizar ahora? (S)i, (n)o > ", answers: { "yes": "S", "no": "n" } },
+      "offer-automatic-package-bump": {
+        text: "¿Desea actualizar la versión del paquete? (S)i, (n) > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      }
     },
     messages: {
       "staging-all-files": "Preparando todos los archivos...",
@@ -264,6 +282,10 @@ const Messages: Messages = {
       "select-commit-message-language": "Seleccione el idioma a utilizar para los mensajes de commit",
       "option-push-description": "Empuja a remoto después del commit",
       "update-package-version": "La versión en su package.json es la misma o inferior a la última versión etiquetada. Actualice la versión de su package.json para que coincida con la última etiqueta.",
+      "select-version-update-type": "Seleccione el tipo de actualización de versión:",
+      "major": "Mayor",
+      "minor": "Menor",
+      "patch": "Parche",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -305,7 +327,12 @@ const Messages: Messages = {
         }
       },
       "update-now": { text: "Voulez-vous mettre à jour maintenant ? (O)ui, (n)o > ", answers: { "yes": "O", "no": "n" } },
-
+      "offer-automatic-package-bump": {
+        text: "Voulez-vous mettre à jour la version du package (O)ui, (n)o >", answers: {
+          "yes": "O",
+          "no": "n",
+        }
+      }
     },
     messages: {
       "staging-all-files": "Indexation de tous les fichiers...",
@@ -354,6 +381,10 @@ const Messages: Messages = {
       "select-commit-message-language": "Sélectionnez la langue à utiliser pour les messages de commit",
       "option-push-description": "Pousser vers la télécommande après le commit",
       "update-package-version": "La version de votre package.json est identique ou inférieure à la dernière version étiquetée. Veuillez mettre à jour la version de votre package.json pour qu'elle corresponde à la dernière étiquette.",
+      "select-version-update-type": "Sélectionnez le type de mise à jour de la version :",
+      "major": "Majeur",
+      "minor": "Mineur",
+      "patch": "Patch",      
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -412,6 +443,12 @@ const Messages: Messages = {
         }
       },
       "update-now": { text: "Vuoi aggiornare ora? (S)i, (n)o > ", answers: { "yes": "S", "no": "n" } },
+      "offer-automatic-package-bump": {
+        text: "Vuoi aggiornare la versione del pacchetto? (S)i, (n)o > ", answers: {
+          "yes": "S",
+          "no": "n",
+        }
+      }
     },
     messages: {
       "staging-all-files": "Mettendo in stage tutti i file...",
@@ -460,6 +497,10 @@ const Messages: Messages = {
       "select-commit-message-language": "Seleziona la lingua da utilizzare per i messaggi di commit",
       "option-push-description": "Esegui push sul remoto dopo il commit",
       "update-package-version": "La versione del tuo package.json è uguale o inferiore all'ultima versione taggata. Aggiorna la versione del tuo package.json per corrispondere all'ultimo tag.",
+      "select-version-update-type": "Seleziona il tipo di aggiornamento della versione:",
+      "major": "Maggiore",
+      "minor": "Minore",
+      "patch": "Patch",     
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -497,6 +538,13 @@ const Messages: Messages = {
       },
       "update-now": {
         "text": "今すぐアップデートしますか？ (はい, いいえ) > ",
+        "answers": {
+          "yes": "は",
+          "no": "い"
+        }
+      },
+      "offer-automatic-package-bump": {
+        "text": "パッケージのバージョンを更新しますか？ (はい, いいえ) > ",
         "answers": {
           "yes": "は",
           "no": "い"
@@ -550,6 +598,10 @@ const Messages: Messages = {
       "select-commit-message-language": "コミットメッセージに使用する言語を選択",
       "option-push-description": "コミット後にリモートにプッシュ",
       "update-package-version": "package.jsonのバージョンが最新のタグと同じかそれよりも低いです。package.jsonのバージョンを最新のタグと一致するように更新してください。",
+      "select-version-update-type": "バージョンの更新タイプを選択:",
+      "major": "メジャー",
+      "minor": "マイナー",
+      "patch": "パッチ",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -679,6 +731,13 @@ const Messages: Messages = {
           "yes": "д",
           "no": "н"
         }
+      },
+      "offer-automatic-package-bump": {
+        "text": "Хотите обновить версию пакета? (Да, нет) > ",
+        "answers": {
+          "yes": "д",
+          "no": "н"
+        }
       }
     },
     "messages": {
@@ -728,6 +787,10 @@ const Messages: Messages = {
       "select-commit-message-language": "Выберите язык для сообщений коммитов",
       "option-push-description": "Пушить в удаленный после коммита",
       "update-package-version": "Версия вашего package.json совпадает или ниже последней тегированной версии. Пожалуйста, обновите версию вашего package.json, чтобы она соответствовала последнему тегу.",
+      "select-version-update-type": "Выберите тип обновления версии:",
+      "major": "Основной",
+      "minor": "Минорный",
+      "patch": "Патч",      
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",
@@ -812,9 +875,16 @@ const Messages: Messages = {
           "yes": "Т",
           "no": "н"
         }
+      },
+      "offer-automatic-package-bump": {
+        "text": "Бажаєте оновити версію пакета? (Т)ак, (н)і > ",
+        "answers": {
+          "yes": "Т",
+          "no": "н"
+        }
       }
     },
-    "messages": {
+    messages: {
       "staging-all-files": "Підготовка всіх файлів...",
       "openai-key-required": "Ви повинні встановити змінну середовища OPENAI_API_KEY або запустити ava-commit --configure",
       "using-cached-summaries": "Використання кешованих резюме та повідомлень коміту з попереднього запуску.",
@@ -860,7 +930,11 @@ const Messages: Messages = {
       "select-cli-language": "Виберіть мову для використання в CLI",
       "select-commit-message-language": "Виберіть мову для повідомлень коміту",
       "option-push-description": "Пуш на віддалений сервер після коміту",
-      "update-package-version": "Версія у вашому package.json така сама або нижча, ніж остання помічена версія. Оновіть версію вашого package.json, щоб вона співпадала з останньою міткою."
+      "update-package-version": "Версія у вашому package.json така сама або нижча, ніж остання помічена версія. Оновіть версію вашого package.json, щоб вона співпадала з останньою міткою.",
+      "select-version-update-type": "Виберіть тип оновлення версії:",
+      "major": "Основний",
+      "minor": "Мінорний",
+      "patch": "Патч",
     },
     "errors": {
       "no-diff": "Немає змін для коміту"

@@ -38,7 +38,7 @@ export async function checkForLatestVersionAndNotify() {
 
 async function checkForLatestVersionSafeWithTimeout(timeout: number): Promise<UpdatePayload> {
   try {
-    const result = await cancelablePromise<UpdatePayload>((resolve) => checkForLatestVersion().then(resolve), timeout);
+    const result = await cancelablePromise<UpdatePayload>((resolve) => checkForLatestVersion().then(resolve).catch(()=>{}), timeout);
     return result;
   } catch (e) {
     // Swallow the error

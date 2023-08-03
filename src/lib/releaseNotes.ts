@@ -1,7 +1,7 @@
 import { OpenAIChat } from "langchain/llms/openai";
 import { configure, loadConfig } from "./configure.js";
 import git from "./git.js";
-import MessagesForCurrentLanguage from "./messages.js";
+import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.js";
 import { summarizeDiffs } from "./summarize.js";
 import { Animation } from 'chalk-animation';
 import { PromptTemplate } from "langchain/prompts";
@@ -10,6 +10,9 @@ import { compareVersions } from 'compare-versions';
 import { countWords } from "alfaaz";
 import promptTemplates from "./promptTemplates.js";
 import packageJson from "./packageJson.js";
+import chalk from "chalk";
+import { input, select } from "@inquirer/prompts";
+import { exec } from "./spawn.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -27,14 +30,45 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   const latest = await getLatestTaggedVersion();
   const localPackageVersion = packageJson.packageVersion();
   console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
-  if (latest === localPackageVersion) {
+
+  if (compareVersions(latest!, localPackageVersion) >= 0) {    
     // Versions match, we should prompt the user to update
-    console.log(MessagesForCurrentLanguage.messages['update-package-version']);
+    console.warn(
+      `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
+   );
+
+   const userAnswer = await input({message: MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].text, default: 
+      MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].answers?.yes});
+   
+    const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"], userAnswer, "y");    
+    if (answer === "y") { 
+      const answer = await select({
+        message: MessagesForCurrentLanguage.messages["select-version-update-type"],
+        choices: [
+          { name: MessagesForCurrentLanguage.messages["patch"], value: "patch" },
+          { name: MessagesForCurrentLanguage.messages["minor"], value: "minor" },
+          { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
+        ]
+      })
+      switch (answer) {
+        case "patch":
+          await exec("npm version patch -m 'chore: Bump package version %s'");
+          break;
+        case "minor":
+          await exec("npm version minor -m 'chore: Bump package version %s'");
+          break;
+        case "major":
+          await exec("npm version major -m 'chore: Bump package version %s'");
+          break;
+      }
+
+      process.exit(1)
+    }
+
   }
   const diffs = await git.diff({ baseCompare: latest, compare: "HEAD" });
   const summaries = await summarizeDiffs(config.openAIApiKey, diffs, verbose);
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
-  // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
     temperature: 0,
     openAIApiKey: config.openAIApiKey,
