@@ -13,6 +13,7 @@ import packageJson from "./packageJson.js";
 import chalk from "chalk";
 import { input, select } from "@inquirer/prompts";
 import { exec } from "./spawn.js";
+import { fetchLatestNpmVersion } from "./environment.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -28,44 +29,7 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   }
   await git.fetch({ all: true });
   const latest = await getLatestTaggedVersion();
-  const localPackageVersion = packageJson.packageVersion();
-  console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
-
-  if (compareVersions(latest!, localPackageVersion) >= 0) {    
-    // Versions match, we should prompt the user to update
-    console.warn(
-      `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
-   );
-
-   const userAnswer = await input({message: MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].text, default: 
-      MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].answers?.yes});
-   
-    const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"], userAnswer, "y");    
-    if (answer === "y") { 
-      const answer = await select({
-        message: MessagesForCurrentLanguage.messages["select-version-update-type"],
-        choices: [
-          { name: MessagesForCurrentLanguage.messages["patch"], value: "patch" },
-          { name: MessagesForCurrentLanguage.messages["minor"], value: "minor" },
-          { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
-        ]
-      })
-      switch (answer) {
-        case "patch":
-          await exec("npm version patch -m 'chore: Bump package version %s'");
-          break;
-        case "minor":
-          await exec("npm version minor -m 'chore: Bump package version %s'");
-          break;
-        case "major":
-          await exec("npm version major -m 'chore: Bump package version %s'");
-          break;
-      }
-
-      process.exit(1)
-    }
-
-  }
+  if (latest) resolveLocalPackageUpdate(latest);
   const diffs = await git.diff({ baseCompare: latest, compare: "HEAD" });
   const summaries = await summarizeDiffs(config.openAIApiKey, diffs, verbose);
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
@@ -95,6 +59,52 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     }
   ]) as { text: string; };
   console.log(summary.text);
+}
+
+async function resolveLocalPackageUpdate(latest: string) {
+  const localPackageVersion = packageJson.packageVersion();
+  if (compareVersions(latest!, localPackageVersion) >= 0) {
+    console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
+
+    // Versions match, we should prompt the user to update
+    const npmVersion = await fetchLatestNpmVersion();
+    // If the version on npm is less than the local or remote tagged version,
+    // there is no reason to update so lets return
+    if (compareVersions(npmVersion, localPackageVersion) <= 0) {
+      return;
+    }
+    console.warn(
+      `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
+    );
+
+    const userAnswer = await input({
+      message: MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].text, default:
+        MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].answers?.yes
+    });
+
+    const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"], userAnswer, "y");
+    if (answer === "y") {
+      const answer = await select({
+        message: MessagesForCurrentLanguage.messages["select-version-update-type"],
+        choices: [
+          { name: MessagesForCurrentLanguage.messages["patch"], value: "patch" },
+          { name: MessagesForCurrentLanguage.messages["minor"], value: "minor" },
+          { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
+        ]
+      })
+      switch (answer) {
+        case "patch":
+          await exec("npm version patch -m 'chore: Bump package version %s'");
+          break;
+        case "minor":
+          await exec("npm version minor -m 'chore: Bump package version %s'");
+          break;
+        case "major":
+          await exec("npm version major -m 'chore: Bump package version %s'");
+          break;
+      }
+    }
+  }
 }
 
 async function getLatestTaggedVersion() {

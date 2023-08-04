@@ -46,11 +46,17 @@ async function checkForLatestVersionSafeWithTimeout(timeout: number): Promise<Up
   }
 }
 
-async function checkForLatestVersion(): Promise<UpdatePayload> {
-  const currentVersion = packageJson.packageVersion();
+export async function fetchLatestNpmVersion() {
   const response = await fetch(`https://registry.npmjs.org/@sethwebster/ava-commit/latest`);
   const json = await response.json();
   const latestVersion = json.version;
+  return latestVersion;
+}
+
+async function checkForLatestVersion(): Promise<UpdatePayload> {
+  const currentVersion = packageJson.packageVersion();
+  const response = await fetchLatestNpmVersion();
+  const latestVersion = response.version;
   const versionComparison = compareVersions(currentVersion, latestVersion);
   return { currentVersion, latestVersion, updateAvailable: versionComparison === -1 };
 }

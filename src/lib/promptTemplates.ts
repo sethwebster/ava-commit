@@ -13,7 +13,7 @@ const summarizeDiff = new PromptTemplate({
 
   Focus on WHY the change was made, not WHAT the change was. Use your context of the code for the WHY, not general knowledge.
 
-  Note: lines that start with a + were added, lines that start with a - were removed.
+  Note: lines that start with a + were added, lines that start with a - were removed. Only use the + and - lines for the substance of the summary, while using the lines around for context.
   
   {diff}
   
