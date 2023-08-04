@@ -61,10 +61,10 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
 
 async function resolveComparisonVersions() {
   const latest = await getLatestTaggedGitVersion();
-  if (latest) resolveLocalPackageUpdate(latest);
+  if (latest) await resolveLocalPackageUpdate(latest);
   const localPackageVersion = packageJson.packageVersion();
   let baseCompare = latest;
-  if (localPackageVersion.replace("v", "") === latest?.replace("v", "")) {
+  if (compareVersions(localPackageVersion, latest!) === 0) {
     // Versions are equal so we should use the previous version for the head 
     // comparison
     const npmVersion = await fetchLatestNpmVersion();
@@ -82,13 +82,13 @@ async function resolveComparisonVersions() {
 
 async function resolveLocalPackageUpdate(latest: string) {
   const localPackageVersion = packageJson.packageVersion();
-  if (compareVersions(latest!, localPackageVersion) >= 0) {
-
-    // Versions match, we should prompt the user to update
+  if (compareVersions(latest, localPackageVersion) >= 0) {
     const npmVersion = await fetchLatestNpmVersion();
     // If the version on npm is less than the local or remote tagged version,
     // there is no reason to update so lets return
-    if (compareVersions(npmVersion, localPackageVersion) <= 0) {
+    console.log(`NPM +++ ${npmVersion} Local +++ ${localPackageVersion} Remote +++ ${latest} ${compareVersions(npmVersion, localPackageVersion)}`);
+
+    if (compareVersions(npmVersion, localPackageVersion) > 0) {
       return;
     }
     console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
@@ -111,16 +111,26 @@ async function resolveLocalPackageUpdate(latest: string) {
           { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
         ]
       })
-      switch (answer) {
-        case "patch":
-          await exec("npm version patch -m 'chore: Bump package version %s'");
-          break;
-        case "minor":
-          await exec("npm version minor -m 'chore: Bump package version %s'");
-          break;
-        case "major":
-          await exec("npm version major -m 'chore: Bump package version %s'");
-          break;
+      try {
+        switch (answer) {
+          case "patch":
+            await exec("npm version patch -m 'chore: Bump package version %s'");
+            break;
+          case "minor":
+            await exec("npm version minor -m 'chore: Bump package version %s'");
+            break;
+          case "major":
+            await exec("npm version major -m 'chore: Bump package version %s'");
+            break;
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          if (e.message.includes("Git working directory not clean")) {
+            console.log(`Git working directory not clean. Aborting package version bump. Run \`ava-commit generate\` to generate a commit and try again.`);
+            process.exit(1);
+          }
+        }
+        throw e;
       }
     }
   }
