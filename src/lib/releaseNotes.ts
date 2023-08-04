@@ -27,10 +27,8 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     createReleaseNotes({});
     return;
   }
-  await git.fetch({ all: true });
-  const latest = await getLatestTaggedVersion();
-  if (latest) resolveLocalPackageUpdate(latest);
-  const diffs = await git.diff({ baseCompare: latest, compare: "HEAD" });
+  var { baseCompare, latest } = await resolveComparisonVersions();
+  const diffs = await git.diff({ baseCompare, compare: "HEAD" });
   const summaries = await summarizeDiffs(config.openAIApiKey, diffs, verbose);
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   const model = new OpenAIChat({
@@ -61,11 +59,25 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   console.log(summary.text);
 }
 
+async function resolveComparisonVersions() {
+  const latest = await getLatestTaggedGitVersion();
+  if (latest) resolveLocalPackageUpdate(latest);
+  const localPackageVersion = packageJson.packageVersion();
+  let baseCompare = latest;
+  if (localPackageVersion.replace("v", "") === latest?.replace("v", "")) {
+    // Versions are equal so we should use the previous version for the head 
+    // comparison
+    let previous = await getPreviousTaggedGitVersion(latest ?? "");
+    console.log(`Local version and latest tag are equal (${chalk.yellow(latest)}). Using previous version ${chalk.yellowBright(previous)} for comparison.`);
+    baseCompare = previous;
+  }
+  return { baseCompare, latest };
+}
+
 async function resolveLocalPackageUpdate(latest: string) {
   const localPackageVersion = packageJson.packageVersion();
   if (compareVersions(latest!, localPackageVersion) >= 0) {
-    console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
-
+    
     // Versions match, we should prompt the user to update
     const npmVersion = await fetchLatestNpmVersion();
     // If the version on npm is less than the local or remote tagged version,
@@ -73,6 +85,7 @@ async function resolveLocalPackageUpdate(latest: string) {
     if (compareVersions(npmVersion, localPackageVersion) <= 0) {
       return;
     }
+    console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
     console.warn(
       `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
     );
@@ -107,7 +120,18 @@ async function resolveLocalPackageUpdate(latest: string) {
   }
 }
 
-async function getLatestTaggedVersion() {
+async function getPreviousTaggedGitVersion(latest: string) {
+  const tags = (await git.tags()).sort((a, b) => {
+    return compareVersions(a, b);
+  }).reverse();
+  const latestIndex = tags.indexOf(latest);
+  const previous = tags[latestIndex + 1];
+  return previous;
+}
+
+async function getLatestTaggedGitVersion() {
+  await git.fetch({ all: true });
+
   const tags = (await git.tags()).sort((a, b) => {
     return compareVersions(a, b);
   }).reverse();
