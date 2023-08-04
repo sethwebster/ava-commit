@@ -67,9 +67,15 @@ async function resolveComparisonVersions() {
   if (localPackageVersion.replace("v", "") === latest?.replace("v", "")) {
     // Versions are equal so we should use the previous version for the head 
     // comparison
-    let previous = await getPreviousTaggedGitVersion(latest ?? "");
-    console.log(`Local version and latest tag are equal (${chalk.yellow(latest)}). Using previous version ${chalk.yellowBright(previous)} for comparison.`);
-    baseCompare = previous;
+    const npmVersion = await fetchLatestNpmVersion();
+    if (compareVersions(npmVersion, localPackageVersion) <= 0) {
+      console.log(`Local version and latest tag (${chalk.yellow(latest)}) are equal, but the published verison on NPM is ${chalk.yellowBright(npmVersion)}. We'll use the NPM version for comparison.`);
+      baseCompare = `v${npmVersion}`;
+    } else {
+      let previous = await getPreviousTaggedGitVersion(latest ?? "");
+      console.log(`Local version and latest tag are equal (${chalk.yellow(latest)}). Using previous version ${chalk.yellowBright(previous)} for comparison.`);
+      baseCompare = previous;
+    }
   }
   return { baseCompare, latest };
 }
@@ -77,7 +83,7 @@ async function resolveComparisonVersions() {
 async function resolveLocalPackageUpdate(latest: string) {
   const localPackageVersion = packageJson.packageVersion();
   if (compareVersions(latest!, localPackageVersion) >= 0) {
-    
+
     // Versions match, we should prompt the user to update
     const npmVersion = await fetchLatestNpmVersion();
     // If the version on npm is less than the local or remote tagged version,
