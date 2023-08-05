@@ -121,7 +121,10 @@ const Messages: Messages = {
       "unstaged-commits-confirm-add": {
         text: "You have unstaged commits. Do you want to stage them before generating the commit messages? (Y, n) > ",
       },
-      "accept-which-summary": { text: "Accept which summary?" },
+      "accept-summary-selection": {
+        text: "Accept which summary?"
+      },
+      "accept-summary-single": { text: "Accept this summary?" },
       "combine-summaries-selection": { text: "Select the options to combine:" },
       "accept-yes-no": { text: "Accept? (Y, n) > " },
       "update-now": { text: "Would you like to update now? (Y, n) > " },
@@ -219,7 +222,8 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "¿Qué resumen desea aceptar?" },
+      "accept-summary-selection": { text: "¿Qué resumen desea aceptar?" },
+      "accept-summary-single": { text: "¿Desea aceptar este resumen?" },
       "combine-summaries-selection": { text: "Introduzca los números de los mensajes de commit a combinar, separados por espacios > " },
       "accept-yes-no": {
         text: "¿Aceptar? (S)i, (n)o > ", answers: {
@@ -318,7 +322,8 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "Accepter quel résumé ?" },
+      "accept-summary-single": { text: "Accepter ce résumé ?" },
+      "accept-summary-selection": { text: "Accepter quel résumé ?" },
       "combine-summaries-selection": { text: "Sélectionnez les options à combiner:" },
       "accept-yes-no": {
         text: "Accepter ? (O)ui, (n)o > ", answers: {
@@ -384,7 +389,7 @@ const Messages: Messages = {
       "select-version-update-type": "Sélectionnez le type de mise à jour de la version :",
       "major": "Majeur",
       "minor": "Mineur",
-      "patch": "Patch",      
+      "patch": "Patch",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -434,7 +439,8 @@ const Messages: Messages = {
           "no": "n",
         }
       },
-      "accept-which-summary": { text: "Quale riepilogo vuoi accettare?" },
+      "accept-summary-single": { text: "Accetti questo riepilogo?" },
+      "accept-summary-selection": { text: "Accetta quale riepilogo?" },
       "combine-summaries-selection": { text: "Seleziona le opzioni da combinare:" },
       "accept-yes-no": {
         text: "Accetti? (S)i, (n)o > ", answers: {
@@ -500,7 +506,7 @@ const Messages: Messages = {
       "select-version-update-type": "Seleziona il tipo di aggiornamento della versione:",
       "major": "Maggiore",
       "minor": "Minore",
-      "patch": "Patch",     
+      "patch": "Patch",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -523,8 +529,11 @@ const Messages: Messages = {
           "no": "い"
         }
       },
-      "accept-which-summary": {
-        "text": "どの要約を受け入れますか",
+      "accept-summary-selection": {
+        "text": "どの要約を受け入れますか"
+      },
+      "accept-summary-single": {
+        "text": "この要約を受け入れますか？"
       },
       "combine-summaries-selection": {
         "text": "結合するオプションを選択してください:",
@@ -707,13 +716,16 @@ const Messages: Messages = {
           "no": "н"
         }
       },
-      "accept-which-summary": {
-        "text": "Какую сводку принять?",
+      "accept-summary-selection": {
+        text: "Какую сводку принять?",
         "answers": {
           "none": "н",
           "combine": "с",
           "regenerate": "р"
         }
+      },
+      "accept-summary-single": {
+        "text": "Принять эту сводку?"
       },
       "combine-summaries-selection": {
         "text": "Выберите опции для объединения:",
@@ -790,7 +802,7 @@ const Messages: Messages = {
       "select-version-update-type": "Выберите тип обновления версии:",
       "major": "Основной",
       "minor": "Минорный",
-      "patch": "Патч",      
+      "patch": "Патч",
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",
@@ -856,7 +868,10 @@ const Messages: Messages = {
           "no": "н"
         }
       },
-      "accept-which-summary": {
+      "accept-summary-single": {
+        "text": "Прийняти це резюме?"
+      },
+      "accept-summary-selection": {
         "text": "Яке резюме ви хочете прийняти?"
       },
       "combine-summaries-selection": {

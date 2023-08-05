@@ -20,6 +20,81 @@ const summarizeDiff = new PromptTemplate({
   Summary:`,
 });
 
+
+const reSummarizeDiff = new PromptTemplate({
+  inputVariables: ["diff", "summary"],
+  template: `This is another chance for you to summarize a diff, but the user was not happy with your summary.  
+  Think step-by-step and improve these summaries.
+
+  You previously summarized the diff that follows as:
+  
+  -- previous summary --
+  {summary} 
+  
+  -- instructions -- 
+  Create a multi-line summary of the follwing diff. 
+  
+  You may have a 50 word summary on line 1, followed by more details on up to 5 lines below.
+
+  Focus on WHY the change was made, not WHAT the change was. Use your context of the code for the WHY, not general knowledge.
+
+  Note: lines that start with a + were added, lines that start with a - were removed. Only use the + and - lines for the substance of the summary, while using the lines around for context.
+  
+  -- diff --
+  {diff}
+  
+  Summary:`,
+});
+
+
+const reSummarizeSummaries = new PromptTemplate({
+  inputVariables: ["summaries", "numberOfDiffs", "maxLength","previousSummaries"],
+  template: `These are summaries of {numberOfDiffs} diffs. 
+    -- context --
+    
+    The user was not happy with your previous summaries which follow. Resummarize them. Think step-by-step and improve these summaries.
+    {previousSummaries}
+
+    -- instructions -- 
+    
+    Purpose: 
+    Create 2 to 3 multi-line commit message options that combine the summaries provided. 
+    
+    Commit Message Format: 
+    The first line with have {maxLength} characters or less for them, and no more than 10 bulleted lines will follow. 
+    Each message will stand on its own as a complete commit message. Options should NOT span multiple options, and should each include all
+    important information.
+    
+    Guiding Principles:
+    Prioritze added code over changes to package lock files or package.json. Don't include any diffs that are just package lock changes.
+    Don't include messages about adding imports.
+
+    Focus on WHY the change was made, not WHAT the change was.
+
+    Output Format:
+    - Output each summary separated by "\n\n---\n\n" and do NOT include a heading at all like "Option 1" or "Option 2".
+    - Include ONLY the commit message and no headings.
+
+    Special Note: If functionality has changed, but the version in the package.json hasn't changed, return a header above all of the options: [CHECK PACKAGE VERSION]
+
+    -- input content --
+    {summaries}
+    
+    -- example output --
+    Summary
+    - additional info line 1
+    - additional info line 2
+    - additional info line 3
+    - additional info line 4
+    - additional info line 5
+    -- output --      
+    Output:
+    {{output}}
+
+    🤖 Generated with Ava Commit
+    `
+});
+
 const summarizeSummaries = new PromptTemplate({
   inputVariables: ["summaries", "numberOfDiffs", "maxLength"],
   template: `These are summaries of {numberOfDiffs} diffs. 
@@ -97,6 +172,8 @@ const releaseNotes = new PromptTemplate({
 export default {
   combineSummaries,
   summarizeDiff,
+  reSummarizeDiff,
   summarizeSummaries,
+  reSummarizeSummaries,
   releaseNotes,  
 }

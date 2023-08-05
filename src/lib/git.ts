@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { spawn } from "./spawn.js";
+import Logger from "./logger.js";
 
 type GitStatusType = "unknown" | "added" | "modified" | "modified-partly-staged" | "deleted";
 type GitStatusEntry = {
@@ -88,6 +89,7 @@ async function push() {
 
 function status(options?: { short?: boolean } | undefined): GitStatusEntry[] {
   const statusResult = spawn("git", ["status", options?.short ? "--short" : ""]);
+  Logger.verbose("git.status - Status result: ", statusResult);
   if (!statusResult) return [];
   const lines = statusResult.split("\n").filter(l => l.trim().length > 0);
   const entries = lines.map<GitStatusEntry>(l => {

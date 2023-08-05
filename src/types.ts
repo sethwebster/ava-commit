@@ -1,3 +1,5 @@
+import { Separator } from "@inquirer/prompts";
+
 export const SupportedAIModels = ["gpt-4", "gpt-3.5-turbo-16k"] as const;
 export const SupportedAIModelNames = ["GPT-4", "GPT-3.5 Turbo 16k"] as const;
 
@@ -382,7 +384,8 @@ export type CliMessages = {
   prompts: {
     "enter-openai-key": CliPrompt;
     "unstaged-commits-confirm-add": CliPrompt;
-    "accept-which-summary": CliPrompt;
+    "accept-summary-single": CliPrompt;
+    "accept-summary-selection": CliPrompt;
     "combine-summaries-selection": CliPrompt;
     "accept-yes-no": CliPrompt;
     "update-now": CliPrompt;
@@ -448,3 +451,32 @@ export type CliMessages = {
 export type Messages = {
   [key in AvailableLanguages]: CliMessages | undefined;
 };
+
+export interface GenerateOptions {
+  verbose: boolean;
+  length: number;
+  releaseNotes: boolean;
+  noCache?: boolean;
+  push?: boolean;
+}
+
+export type Choice<Value> = {
+  value: Value;
+  name?: string;
+  description?: string;
+  disabled?: boolean | string;
+  type?: never;
+};
+
+export type ChoicesType<T> = (Separator | Choice<T>);
+
+export interface GenerateContext {
+  diffs: string[];
+  summaries: string[];
+  commitMessages: string[];
+  openAIApiKey: string;
+}
+
+export type GenerateStatusWithContext = {
+  status: "complete" | "continue" | "error";
+} & GenerateContext;
