@@ -230,13 +230,18 @@ const releaseNotes = new PromptTemplate({
     {summaries}
     
     -- example output --
-    Summary
-    - additional info line 1
-    - additional info line 2
-    - additional info line 3
-    - additional info line 4
-    - additional info line 5
-    ...
+    # Release notes for <new version>!
+
+    ## New Features
+    Added a bunch of new features like Automatic Updating, Release Notes, and more!
+    - Command line now offers a 'release-notes' command - this compares diffs between tags and writes your notes for you.
+    - Command line now offers an 'update' command - this updates the command line to the latest version.
+    - Thanks to the new 'update' command, you can now run 'ava-commit update' to update the command line.
+    etc.
+
+    # Bug Fixes
+    Fixed a bunch of bugs!
+    - bug 1
     -- output --      
     Output:
     {{output}}
