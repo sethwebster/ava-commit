@@ -4,9 +4,10 @@ import chalk from 'chalk';
 import boxen, { Options } from 'boxen';
 import { compareVersions } from 'compare-versions';
 import { exec, spawn } from './spawn.js';
-import cancelablePromise from './cancelablePromise.js';
+import { promiseWithTimeout } from './promiseWithTimeout.js';
 import MessagesForCurrentLanguage from './messages.js';
 import { input } from '@inquirer/prompts';
+import Logger from './logger.js';
 
 export function makeAvaHomePath() {
   return `${process.env.HOME}/.ava-commit`;
@@ -27,10 +28,11 @@ export function ensureAvaDiffCachePathExists() {
   }
 }
 
-export async function checkForLatestVersionAndNotify() {
-  const { currentVersion, latestVersion, updateAvailable } = await checkForLatestVersionSafeWithTimeout(500);
+export async function checkForLatestVersionAndNotify(_options?: { verbose?: boolean }) {
+  Logger.verbose("Checking for latest version...");
+  const { currentVersion, latestNpmVersion, updateAvailable } = await checkForLatestVersionSafeWithTimeout(1000);
   if (!updateAvailable) return;
-  notifyUpdate({ currentVersion, latestVersion, updateAvailable });
+  notifyUpdate({ currentVersion, latestNpmVersion, updateAvailable });
   if (updateAvailable) {
     await offerUpdate();
   }
@@ -38,12 +40,22 @@ export async function checkForLatestVersionAndNotify() {
 
 async function checkForLatestVersionSafeWithTimeout(timeout: number): Promise<UpdatePayload> {
   try {
-    const result = await cancelablePromise<UpdatePayload>((resolve) => checkForLatestVersion().then(resolve).catch(()=>{}), timeout);
+    // const result = await new Promise<UpdatePayload>((resolve) => checkForLatestVersion().then(resolve));
+    const result = await promiseWithTimeout(checkForLatestVersion(), timeout);
+    Logger.verbose("Version information: ", result);
     return result;
   } catch (e) {
     // Swallow the error
-    return { currentVersion: packageJson.packageVersion(), latestVersion: packageJson.packageVersion(), updateAvailable: false };
+    Logger.verbose("Error checking for latest version: ", e);
+    return { currentVersion: packageJson.packageVersion(), latestNpmVersion: packageJson.packageVersion(), updateAvailable: false };
   }
+}
+
+async function checkForLatestVersion(): Promise<UpdatePayload> {
+  const currentVersion = packageJson.packageVersion();
+  const latestNpmVersion = await fetchLatestNpmVersion();
+  const versionComparison = compareVersions(currentVersion, latestNpmVersion);
+  return { currentVersion, latestNpmVersion, updateAvailable: versionComparison === -1 };
 }
 
 export async function fetchLatestNpmVersion() {
@@ -53,21 +65,13 @@ export async function fetchLatestNpmVersion() {
   return latestVersion;
 }
 
-async function checkForLatestVersion(): Promise<UpdatePayload> {
-  const currentVersion = packageJson.packageVersion();
-  const response = await fetchLatestNpmVersion();
-  const latestVersion = response.version;
-  const versionComparison = compareVersions(currentVersion, latestVersion);
-  return { currentVersion, latestVersion, updateAvailable: versionComparison === -1 };
-}
-
 interface UpdatePayload {
   currentVersion: string;
-  latestVersion: string;
+  latestNpmVersion: string;
   updateAvailable: boolean;
 }
 
-function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: UpdatePayload) {
+function notifyUpdate({ currentVersion, latestNpmVersion, updateAvailable }: UpdatePayload) {
   if (updateAvailable) {
     // Draw a corner and a line
     const options: Options = {
@@ -77,9 +81,10 @@ function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: Update
       dimBorder: true,
       title: MessagesForCurrentLanguage.messages['update-available-header'],
     }
+
     console.log(
       boxen(
-        `\🎉🎉 ${chalk.bold(chalk.green("ava-commit"))} ${chalk.bold(chalk.yellow(currentVersion))} ${MessagesForCurrentLanguage.messages["update-available-body"]} ${chalk.bold(chalk.green(latestVersion))}.
+        `\🎉🎉 ${chalk.bold(chalk.green("ava-commit"))} ${chalk.bold(chalk.yellow(currentVersion))} ${MessagesForCurrentLanguage.messages["update-available-body"]} ${chalk.bold(chalk.green(latestNpmVersion))}.
         ${MessagesForCurrentLanguage.messages["run"]} ${chalk.bold(chalk.green("npm i -g @sethwebster/ava-commit"))} ${MessagesForCurrentLanguage.messages['to-update']}.
         `, options
       )
@@ -88,7 +93,7 @@ function notifyUpdate({ currentVersion, latestVersion, updateAvailable }: Update
 }
 
 async function offerUpdate() {
-  const userUpdateOfferAnswer = await input({message: MessagesForCurrentLanguage.prompts["update-now"].text});
+  const userUpdateOfferAnswer = await input({ message: MessagesForCurrentLanguage.prompts["update-now"].text });
   const trimmed = userUpdateOfferAnswer.trim().toLowerCase();
   if (trimmed === "y" || trimmed.length === 0) {
     await doAutoUpdate();

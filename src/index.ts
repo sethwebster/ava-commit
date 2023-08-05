@@ -6,18 +6,24 @@ import { createReleaseNotes } from './lib/releaseNotes.js';
 import generate from './lib/generate.js';
 import { checkForLatestVersionAndNotify, doAutoUpdate } from './lib/environment.js';
 import MessagesForCurrentLanguage from './lib/messages.js';
+import Logger from './lib/logger.js';
 
 async function start() {
+  if (process.argv.find((arg) => arg === '--verbose')) {
+    Logger.setVerbose(true);
+  }
   await checkForLatestVersionAndNotify();
   const program = new Command();
   program.version(packageJson.packageVersion(), "-V,--version", MessagesForCurrentLanguage.messages["display-version-information"])
+    .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false)
     .description(MessagesForCurrentLanguage.messages.description)
     .name('ava-commit')
-    .addCommand(new Command("update").description(MessagesForCurrentLanguage.messages["update-command-description"]).action(() => {
-      doAutoUpdate();
-    }))
+    .addCommand(new Command("update").description(MessagesForCurrentLanguage.messages["update-command-description"])
+      .action(() => {
+        doAutoUpdate();
+      }))
     .addCommand(new Command("release-notes").description(MessagesForCurrentLanguage.messages["release-notes-command-description"])
-      .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false)
+      .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false).action(() => Logger.setVerbose(true))
       .action((options) => createReleaseNotes(options)))
     .addCommand(new Command("configure").description(MessagesForCurrentLanguage.messages["configure-command-description"]).action((options) => configure(options)))
     .addCommand(new Command("generate").description(MessagesForCurrentLanguage.messages["generate-command-description"])
