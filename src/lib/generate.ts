@@ -27,7 +27,7 @@ export default async function generate(options: GenerateOptions) {
   }
 
   const context = await doGenerate({ ...options, openAIApiKey });
-  console.log("the context", context);
+
   console.log(); // Ends the rainbow
 
   if (context.status !== "error") {
@@ -113,14 +113,18 @@ async function handleCombine(context: GenerateStatusWithContext, options: Genera
   const { length } = options;
   const choices = commitMessages.map((s, i) => ({ name: `${i + 1}. ${s}`, value: i + 1 }));
   let numbers: number[] = [];
-  numbers = await checkbox<number>({
-    message: MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text,
-    choices: [
-      { name: "0. Back", value: 0 },
-      ...choices,
-    ],
-    pageSize: 20
-  });
+  if (choices.length > 2) {
+    numbers = await checkbox<number>({
+      message: MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text,
+      choices: [
+        { name: "0. Back", value: 0 },
+        ...choices,
+      ],
+      pageSize: 20
+    });
+  } else {
+    numbers = [1, 2]
+  }
   if (numbers.length === 0 || numbers[0] === 0) {
     return { ...context, status: "continue" };
   }
