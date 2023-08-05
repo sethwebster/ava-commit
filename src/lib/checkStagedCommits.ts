@@ -8,7 +8,6 @@ import Logger from "./logger.js";
 export default async function checkStagedCommits(options: { all: boolean } = { all: false }) {
   Logger.verbose("Checking for staged commits...")
   const status = checkForStagedCommits();
-  Logger.verbose("Status: ", status)
   if (status.length === 0) {
     console.log(chalk.red(MessagesForCurrentLanguage.errors["no-diff"]));
     process.exit(1);

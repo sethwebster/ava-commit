@@ -8,6 +8,7 @@ import { countWords } from 'alfaaz';
 import { ChainValues } from 'langchain/schema';
 import promptTemplates from './promptTemplates.js';
 import { loadConfig } from './configure.js';
+import Logger from './logger.js';
 
 const MODELS = {
   "gpt35": "gpt-3.5-turbo-16k",
@@ -190,6 +191,7 @@ export async function reSummarizeSummaries(options: ReSummarizeSummariesOptions)
 export async function summarizeSummaries(options: SummarizeSummariesOptions): Promise<string[]> {
   const { openAIApiKey, verbose, summaries, maxLength } = options;
   const config = loadConfig();
+  Logger.verbose("summarizeSummaries", options, config)
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   // console.log(`Summarizing ${chalk.bold(chalk.yellow(summaries.length))} summaries ${chalk.bold(chalk.yellow(maxLen))} characters or less`);
   const model = new OpenAIChat({
@@ -198,6 +200,7 @@ export async function summarizeSummaries(options: SummarizeSummariesOptions): Pr
     modelName: config.summarizeSummariesModel,
     maxTokens: -1,
     streaming: true,
+    verbose
   });
 
   const chain = new LLMChain({
@@ -206,6 +209,7 @@ export async function summarizeSummaries(options: SummarizeSummariesOptions): Pr
     verbose: verbose,
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
+  
   let summaryText = "";
   const summary = await chain.call({ summaries: mappedSummaries, numberOfDiffs: summaries.length, maxLength }, [
     {
@@ -227,7 +231,7 @@ export async function summarizeSummaries(options: SummarizeSummariesOptions): Pr
  * @returns A string combined from the LLM
  */
 export async function combineSummaries(options: CombineSummariesOptions): Promise<string> {
-  const { openAIApiKey, summaries } = options;
+  const { openAIApiKey, summaries, verbose} = options;
   const config = loadConfig();
   const rainbow = chalkAnimation.rainbow(`${MessagesForCurrentLanguage.messages['ava-is-combining-summaries'].replace("{summaryCount}", summaries.length.toString())} 0 characters`);
   const model = new OpenAIChat({
@@ -236,13 +240,14 @@ export async function combineSummaries(options: CombineSummariesOptions): Promis
     modelName: config.summarizeSummariesModel,
     maxTokens: -1,
     streaming: true,
+    verbose
   });
 
 
   const chain = new LLMChain({
     llm: model,
     prompt: promptTemplates.combineSummaries,
-    verbose: false,
+    verbose
   });
 
   let summaryText = "";

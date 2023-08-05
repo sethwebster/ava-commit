@@ -9,13 +9,14 @@ import MessagesForCurrentLanguage from './lib/messages.js';
 import Logger from './lib/logger.js';
 
 async function start() {
+  let verbose = false;
   if (process.argv.find((arg) => arg === '--verbose')) {
-    Logger.setVerbose(true);
+    verbose = true;
   }
+  Logger.setVerbose(verbose);
   await checkForLatestVersionAndNotify();
   const program = new Command();
   program.version(packageJson.packageVersion(), "-V,--version", MessagesForCurrentLanguage.messages["display-version-information"])
-    .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false)
     .description(MessagesForCurrentLanguage.messages.description)
     .name('ava-commit')
     .addCommand(new Command("update").description(MessagesForCurrentLanguage.messages["update-command-description"])
@@ -27,8 +28,8 @@ async function start() {
       .action((options) => createReleaseNotes(options)))
     .addCommand(new Command("configure").description(MessagesForCurrentLanguage.messages["configure-command-description"]).action((options) => {configure(options)}))
     .addCommand(new Command("generate").description(MessagesForCurrentLanguage.messages["generate-command-description"])
-      .option("-a,--all", MessagesForCurrentLanguage.messages["option-all-description"], false)
-      .option('-v,--verbose', MessagesForCurrentLanguage.messages["option-verbose-description"], false)
+      .option("-a, --all", MessagesForCurrentLanguage.messages["option-all-description"], false)
+      .option('-v, --verbose', MessagesForCurrentLanguage.messages["option-verbose-description"], false)
       .option("-p, --push", MessagesForCurrentLanguage.messages["option-push-description"], false)
       .option<number>('-l,--length [number]', MessagesForCurrentLanguage.messages["option-length-description"], (val, prev) => {
         return parseInt(val);
@@ -40,6 +41,8 @@ async function start() {
       .addHelpText('after', MessagesForCurrentLanguage.messages["example-2"])
       .addHelpText('after', MessagesForCurrentLanguage.messages["example-3"])
       .action((options) => {
+        
+        Logger.verbose("Generate Options", options)
         generate(options);
       })
     )
