@@ -454,6 +454,7 @@ export type Messages = {
 
 export interface GenerateOptions {
   verbose: boolean;
+  all: boolean;
   length: number;
   releaseNotes: boolean;
   noCache?: boolean;

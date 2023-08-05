@@ -29,7 +29,7 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   }
   var { baseCompare, latest } = await resolveComparisonVersions();
   const diffs = await git.diff({ baseCompare, compare: "HEAD" });
-  const summaries = await summarizeDiffs(config.openAIApiKey, diffs, verbose);
+  const summaries = await summarizeDiffs({ openAIApiKey: config.openAIApiKey, diffs, verbose });
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   const model = new OpenAIChat({
     temperature: 0,

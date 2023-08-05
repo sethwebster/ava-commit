@@ -22,11 +22,15 @@ const summarizeDiff = new PromptTemplate({
 
 
 const reSummarizeDiff = new PromptTemplate({
-  inputVariables: ["diff", "summary"],
+  inputVariables: ["diff", "summary", "hint"],
   template: `This is another chance for you to summarize a diff, but the user was not happy with your summary.  
   Think step-by-step and improve these summaries.
 
   You previously summarized the diff that follows as:
+
+  -- user hint --
+  The user provided the following hint:
+  {hint}
   
   -- previous summary --
   {summary} 
@@ -48,12 +52,16 @@ const reSummarizeDiff = new PromptTemplate({
 
 
 const reSummarizeSummaries = new PromptTemplate({
-  inputVariables: ["summaries", "numberOfDiffs", "maxLength","previousSummaries"],
+  inputVariables: ["summaries", "numberOfDiffs", "maxLength","previousSummaries", "hint"],
   template: `These are summaries of {numberOfDiffs} diffs. 
     -- context --
     
     The user was not happy with your previous summaries which follow. Resummarize them. Think step-by-step and improve these summaries.
     {previousSummaries}
+
+    -- user hint --
+    The user provided the following hint:
+    {hint}
 
     -- instructions -- 
     

@@ -115,6 +115,8 @@ export async function configure(options: any) {
       choices: languageChoices(),
     }),
   }
-  saveConfig({ ...existingConfig, ...answers });
+  const config = { ...existingConfig, ...answers };
+  saveConfig(config);
+  return config;
 }
 

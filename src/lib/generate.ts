@@ -1,26 +1,24 @@
-import chalk from "chalk";
-import cache from "./cache.js";
-import checkStagedCommits from "./checkStagedCommits.js";
-import { configure, loadConfig } from "./configure.js";
-import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.js";
-import git from "./git.js";
 import { combineSummaries, reSummarizeSummaries, resummarizeDiffs, summarizeDiffs, summarizeSummaries } from "./summarize.js";
-import { Separator, checkbox, select } from "@inquirer/prompts";
+import { configure, loadConfig } from "./configure.js";
+import { Separator, checkbox, select, input } from "@inquirer/prompts";
+import cache from "./cache.js";
+import chalk from "chalk";
+import checkStagedCommits from "./checkStagedCommits.js";
+import git from "./git.js";
 import Logger from "./logger.js";
+import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.js";
 import { ChoicesType, GenerateOptions, GenerateStatusWithContext } from "../types.js";
 
-export default async function generate(options: { all: boolean; verbose: boolean; length: number; releaseNotes: boolean; noCache?: boolean; push?: boolean }) {
+export default async function generate(options: GenerateOptions) {
   Logger.verbose("Generate is starting...")
-  const { all, verbose, length, releaseNotes, noCache } = options;
-  const existingConfig = loadConfig();
+  let existingConfig = loadConfig();
   const envOpenAiKey = process.env.OPENAI_API_KEY ?? undefined;
   let openAIApiKey = envOpenAiKey ?? existingConfig.openAIApiKey;
-  const hasApiKey = existingConfig.openAIApiKey !== undefined || envOpenAiKey !== undefined;
+  let hasApiKey = existingConfig.openAIApiKey !== undefined || envOpenAiKey !== undefined;
   if (!hasApiKey) {
-    configure(options).then(() => {
-      generate(options);
-    });
-    return;
+    existingConfig = await configure(options);
+    openAIApiKey = existingConfig.openAIApiKey;
+    hasApiKey = existingConfig.openAIApiKey !== undefined;
   }
 
   if (!hasApiKey || !openAIApiKey || openAIApiKey.length === 0) {
@@ -29,15 +27,15 @@ export default async function generate(options: { all: boolean; verbose: boolean
   }
 
   const context = await doGenerate({ ...options, openAIApiKey });
+  console.log(); // Ends the rainbow
 
   if (context.status !== "error") {
-    console.log(); // Ends the rainbow
     setTimeout(async () =>
       await getUserResponseToMessages(context, options), 100);
   }
 }
 
-export async function doGenerate(options: GenerateOptions & { openAIApiKey: string }): Promise<GenerateStatusWithContext> {
+async function doGenerate(options: GenerateOptions & { openAIApiKey: string }): Promise<GenerateStatusWithContext> {
   const { openAIApiKey, verbose, length, releaseNotes, noCache } = options;
 
   try {
@@ -52,8 +50,8 @@ export async function doGenerate(options: GenerateOptions & { openAIApiKey: stri
       summaries = previousSummaryRun.summaries;
       commitMessages = previousSummaryRun.commitMessages;
     } else {
-      summaries = await summarizeDiffs(openAIApiKey, diffs, options.verbose);
-      commitMessages = await summarizeSummaries(openAIApiKey, summaries, options.length, options.verbose);
+      summaries = await summarizeDiffs({ openAIApiKey, diffs, verbose: options.verbose });
+      commitMessages = await summarizeSummaries({ openAIApiKey, summaries, maxLength: length, verbose });
       cache.storePreviousRun(diffs, summaries, commitMessages);
     }
 
@@ -66,18 +64,19 @@ export async function doGenerate(options: GenerateOptions & { openAIApiKey: stri
   }
 }
 
-export async function doRegenerate(context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
+async function doRegenerate(hint: string, context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
   const { diffs, summaries, commitMessages, openAIApiKey } = context;
   const { verbose, length, releaseNotes, noCache } = options;
   try {
-    const newSummaries = await resummarizeDiffs(openAIApiKey, diffs, summaries, options.verbose);
-    const newCommitMessages = await reSummarizeSummaries(
+    const newSummaries = await resummarizeDiffs({ openAIApiKey, hint, diffs, summaries, verbose: options.verbose });
+    const newCommitMessages = await reSummarizeSummaries({
       openAIApiKey,
-      newSummaries,
-      context.summaries,
-      options.length,
-      options.verbose
-    )
+      diffSummaries: newSummaries,
+      previousSummaries: summaries,
+      length,
+      verbose,
+      hint,
+    })
     cache.storePreviousRun(diffs, newSummaries, newCommitMessages);
     // await getUserResponseToMessages(openAiKey, commitMessages, diffs, options)
     console.log();
@@ -100,12 +99,17 @@ function generateChoices(commitMessages: string[]): ChoicesType<string>[] {
 }
 
 async function handleRegenerate(context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
-  const newContext = await doRegenerate(context, { ...options, noCache: true });
+  const hint = (await input({
+    message: "Would you like to provide a hint for Ava?",
+    default: "none",
+  })) ?? "none";
+  const newContext = await doRegenerate(hint, context, { ...options, noCache: true });
   return { ...newContext, status: "continue" };
 }
 
 async function handleCombine(context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
   const { commitMessages, diffs, openAIApiKey } = context;
+  const { length } = options;
   const choices = commitMessages.map((s, i) => ({ name: `${i + 1}. ${s}`, value: i + 1 }));
   let numbers: number[] = [];
   numbers = await checkbox<number>({
@@ -120,7 +124,7 @@ async function handleCombine(context: GenerateStatusWithContext, options: Genera
     return { ...context, status: "continue" };
   }
   const combined = numbers.map(n => commitMessages[n - 1]);
-  const resummarized = await combineSummaries(openAIApiKey!, combined);
+  const resummarized = await combineSummaries({ openAIApiKey, summaries: combined, maxLength: length });
   console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
   return await getUserResponseToMessages({ status: "continue", diffs, summaries: [resummarized], commitMessages: [resummarized], openAIApiKey }, options);
 }

@@ -25,7 +25,7 @@ async function start() {
     .addCommand(new Command("release-notes").description(MessagesForCurrentLanguage.messages["release-notes-command-description"])
       .option("-v,--verbose", MessagesForCurrentLanguage.messages["option-verbose-description"], false).action(() => Logger.setVerbose(true))
       .action((options) => createReleaseNotes(options)))
-    .addCommand(new Command("configure").description(MessagesForCurrentLanguage.messages["configure-command-description"]).action((options) => configure(options)))
+    .addCommand(new Command("configure").description(MessagesForCurrentLanguage.messages["configure-command-description"]).action((options) => {configure(options)}))
     .addCommand(new Command("generate").description(MessagesForCurrentLanguage.messages["generate-command-description"])
       .option("-a,--all", MessagesForCurrentLanguage.messages["option-all-description"], false)
       .option('-v,--verbose', MessagesForCurrentLanguage.messages["option-verbose-description"], false)
