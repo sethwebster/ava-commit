@@ -27,6 +27,7 @@ export default async function generate(options: GenerateOptions) {
   }
 
   const context = await doGenerate({ ...options, openAIApiKey });
+  console.log("the context", context);
   console.log(); // Ends the rainbow
 
   if (context.status !== "error") {
@@ -157,7 +158,7 @@ async function summariesRouter(answer: string, context: GenerateStatusWithContex
 }
 
 async function getUserResponseToMessages(statusWithContext: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
-  const { commitMessages, openAIApiKey, diffs } = statusWithContext;
+  const { commitMessages } = statusWithContext;
   let status: GenerateStatusWithContext = { ...statusWithContext, status: "continue" }
   while (status.status === "continue") {
     const choices = await generateChoices(commitMessages);

@@ -29,7 +29,7 @@ const reSummarizeDiff = new PromptTemplate({
   You previously summarized the diff that follows as:
 
   -- user hint --
-  The user provided the following hint:
+  The user provided the following suggestion to improve the summary. Use it to change your response.
   {hint}
   
   -- previous summary --
@@ -60,7 +60,7 @@ const reSummarizeSummaries = new PromptTemplate({
     {previousSummaries}
 
     -- user hint --
-    The user provided the following hint:
+    The user provided the following hint. Use it to refine your summary:
     {hint}
 
     -- instructions -- 
