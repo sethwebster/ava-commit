@@ -69,7 +69,6 @@ export async function doGenerate(options: GenerateOptions & { openAIApiKey: stri
 export async function doRegenerate(context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
   const { diffs, summaries, commitMessages, openAIApiKey } = context;
   const { verbose, length, releaseNotes, noCache } = options;
-  console.log("context", context)
   try {
     const newSummaries = await resummarizeDiffs(openAIApiKey, diffs, summaries, options.verbose);
     const newCommitMessages = await reSummarizeSummaries(
