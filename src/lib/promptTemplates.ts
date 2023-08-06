@@ -3,8 +3,16 @@ import { PromptTemplate } from "langchain/prompts";
 const combineSummaries = new PromptTemplate({
   inputVariables: ["summaries"],
   template: `Combine the following summaries into a single summary. 
-  It should have a first line (no more than 100 chars) overall summary followed by bullets that expand on the summary. 
+  It should have a first line (no more than 50 chars) overall summary followed by bullets that expand on the summary. 
   
+  Example Output:
+  Makes a change to the UI allowing the user to cancel running jobs
+  - refactored JobsList.tsx to use the new API
+  - added a new button to the UI
+  - added a new API endpoint to cancel jobs
+  - something else in the diffs
+  - etc.
+
   Do not remove any important information:
   -- summaries --
   {summaries}

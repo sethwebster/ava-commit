@@ -14,6 +14,7 @@ import chalk from "chalk";
 import { input, select } from "@inquirer/prompts";
 import { exec } from "./spawn.js";
 import { fetchLatestNpmVersion } from "./environment.js";
+import Logger from "./logger.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
@@ -28,7 +29,9 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
     return;
   }
   var { baseCompare, latest } = await resolveComparisonVersions();
-  const diffs = await git.diff({ baseCompare, compare: "HEAD" });
+  Logger.log(`Generating release notes between ${chalk.yellow(baseCompare)} and ${chalk.yellow(latest)}...`)
+
+  const diffs = await git.diff({ baseCompare, compare: latest });
   const summaries = await summarizeDiffs({ openAIApiKey: config.openAIApiKey, diffs, verbose });
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   const model = new OpenAIChat({
@@ -60,11 +63,26 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
 }
 
 async function resolveComparisonVersions() {
-  const latest = await getLatestTaggedGitVersion();
+  let latest = await getLatestTaggedGitVersion();
   if (latest) await resolveLocalPackageUpdate(latest);
-  const localPackageVersion = packageJson.packageVersion();
+  if (!latest) {
+    latest = "HEAD";
+  }
+  let localPackageVersion = packageJson.packageVersionFromProject();
+  if (!localPackageVersion) {
+    localPackageVersion = "HEAD";
+  }
+
+  switch (true) {
+    case latest === "HEAD" && localPackageVersion === "HEAD":
+      console.log(`No versions to compare could be found. This is likely because you haven't set a package.json version. `)
+      process.exit(1);
+      break;
+    // More to come here
+  }
+
   let baseCompare = latest;
-  if (compareVersions(localPackageVersion, latest!) === 0) {
+  if (latest !== "HEAD" && compareVersions(localPackageVersion, latest!) === 0) {
     // Versions are equal so we should use the previous version for the head 
     // comparison
     const npmVersion = await fetchLatestNpmVersion();
@@ -86,12 +104,11 @@ async function resolveLocalPackageUpdate(latest: string) {
     const npmVersion = await fetchLatestNpmVersion();
     // If the version on npm is less than the local or remote tagged version,
     // there is no reason to update so lets return
-    console.log(`NPM +++ ${npmVersion} Local +++ ${localPackageVersion} Remote +++ ${latest} ${compareVersions(npmVersion, localPackageVersion)}`);
+    console.log(`+++ NPM ${npmVersion} +++ Local ${localPackageVersion} +++ Remote  ${latest}`);
 
     if (compareVersions(npmVersion, localPackageVersion) > 0) {
       return;
     }
-    console.log(`Remote +++ ${latest} Local +++ ${localPackageVersion}`);
     console.warn(
       `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
     );

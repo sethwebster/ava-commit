@@ -8,12 +8,14 @@ export function spawn(command: string, args: string[]) {
     throw result.error;
   }
   if (result.status !== 0) {
+    console.log("Non-zero exit code from git:", result.stderr.toString());
     throw new Error(`Command exited with status ${result.status}`);
   }
   if (result.signal !== null) {
     throw new Error(`Command exited with signal ${result.signal}`);
   }
   if (result.stderr && result.stderr.length > 0) {
+    console.log("[error]", result.stderr.toString());
     throw new Error(result.stderr.toString());
   }
   if (result.stdout && result.stdout.length > 0) {

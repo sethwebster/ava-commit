@@ -131,7 +131,7 @@ async function handleCombine(context: GenerateStatusWithContext, options: Genera
   const combined = numbers.map(n => commitMessages[n - 1]);
   const resummarized = await combineSummaries({ openAIApiKey, summaries: combined, maxLength: length });
   console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
-  return await getUserResponseToMessages({ status: "continue", diffs, summaries: [resummarized], commitMessages: [resummarized], openAIApiKey }, options);
+  return await getUserResponseToMessages({ status: "continue", diffs, summaries: combined, commitMessages: [resummarized], openAIApiKey }, options);
 }
 
 async function handleDefaultCase(answer: string, context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
