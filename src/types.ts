@@ -441,7 +441,10 @@ export type CliMessages = {
     "select-version-update-type": string;
     "patch": string;
     "minor": string;
-    "major": string;    
+    "major": string;
+    "latest-tagged-is-greater-than-local-but-npm-is-newer": string;
+    "npm-is-newer-than-local": string;
+
   }
   errors: {
     "no-diff": string;
@@ -481,3 +484,12 @@ export interface GenerateContext {
 export type GenerateStatusWithContext = {
   status: "complete" | "continue" | "error";
 } & GenerateContext;
+
+/** @typedef {import('../package.json') T_npm_packageJSON } */
+
+export type VersionInfo = {
+  packageJsonVersion: string;
+  latestTaggedGitVersion: string;
+  latestNpmVersion: string;
+  previousTaggedGitVersion: string;
+};

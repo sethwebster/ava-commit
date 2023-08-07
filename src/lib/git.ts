@@ -44,6 +44,21 @@ async function diff(options?: DiffOptions) {
   });
 }
 
+async function log({ baseCompare, compare }: Omit<DiffOptions, "staged">) {
+  try {
+    const logResult = spawn("git", ["log", "--pretty=%B", baseCompare ?? "", compare ?? "HEAD"]);
+    const lines = (logResult ?? "").split("\n").filter(l => l.trim().length > 0);
+    return lines;
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message.includes("ambiguous argument")) {
+        Logger.verbose("git.log - No commits found")
+        return [];
+      }
+    }
+  }
+}
+
 async function fetch({ all }: { all?: boolean } = {}) {
   return new Promise((resolve, reject) => {
     try {
@@ -125,6 +140,7 @@ const git = {
   fetch,
   push,
   tags,
+  log
 }
 
 export default git;

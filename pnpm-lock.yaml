@@ -28,6 +28,9 @@ dependencies:
   langchain:
     specifier: ^0.0.120
     version: 0.0.120
+  package-json-type:
+    specifier: ^1.0.3
+    version: 1.0.3
 
 devDependencies:
   '@types/chalk-animation':
@@ -1209,6 +1212,10 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       p-finally: 1.0.0
+    dev: false
+
+  /package-json-type@1.0.3:
+    resolution: {integrity: sha512-Bey4gdRuOwDbS8Fj1qA3/pTq5r8pqiI5E3tjSqCdhaLSsyGG364VFzXLTIexN5AaNGe/vgdBzLfoKdr7EVg2KQ==}
     dev: false
 
   /parse-json@5.2.0:

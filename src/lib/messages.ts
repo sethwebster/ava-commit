@@ -183,6 +183,9 @@ const Messages: Messages = {
       "option-push-description": "Push to remote after commit",
       "update-package-version": "The version in your package.json is the same or lower than the latest tagged version. Please update your package.json version to match the latest tag.",
       "select-version-update-type": "Select version update type:",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "Local package.json version {packageJsonVersion} is older than the latest tagged version {latestTaggedGitVersion} and NPM version {latestNpmVersion}.\nDo you have the latest changes?",
+      "npm-is-newer-than-local": "NPM version {latestNpmVersion} is newer than the local version {packageJsonVersion}.\nDo you have the latest changes?",
+
       // Version update types
       "major": "Major",
       "minor": "Minor",
@@ -290,6 +293,8 @@ const Messages: Messages = {
       "major": "Mayor",
       "minor": "Menor",
       "patch": "Parche",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "La versión local de package.json {packageJsonVersion} es más antigua que la última versión etiquetada {latestTaggedGitVersion} y la versión de NPM {latestNpmVersion}.\n¿Tiene los últimos cambios?",
+      "npm-is-newer-than-local": "La versión de NPM {latestNpmVersion} es más reciente que la versión local {packageJsonVersion}.\n¿Tiene los últimos cambios?",
     },
     errors: {
       "no-diff": "No hay cambios para hacer commit",
@@ -390,6 +395,8 @@ const Messages: Messages = {
       "major": "Majeur",
       "minor": "Mineur",
       "patch": "Patch",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "La version locale de package.json {packageJsonVersion} est plus ancienne que la dernière version étiquetée {latestTaggedGitVersion} et la version de NPM {latestNpmVersion}.\nAvez-vous les derniers changements ?",
+      "npm-is-newer-than-local": "La version de NPM {latestNpmVersion} est plus récente que la version locale {packageJsonVersion}.\nAvez-vous les derniers changements ?",
     },
     errors: {
       "no-diff": "Aucun changement à commiter",
@@ -507,6 +514,8 @@ const Messages: Messages = {
       "major": "Maggiore",
       "minor": "Minore",
       "patch": "Patch",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "La versione locale di package.json {packageJsonVersion} è più vecchia dell'ultima versione taggata {latestTaggedGitVersion} e la versione di NPM {latestNpmVersion}.\nHai gli ultimi cambiamenti?",
+      "npm-is-newer-than-local": "La versione di NPM {latestNpmVersion} è più recente della versione locale {packageJsonVersion}.\nHai gli ultimi cambiamenti?",
     },
     errors: {
       "no-diff": "Nessuna modifica da commitare",
@@ -611,6 +620,8 @@ const Messages: Messages = {
       "major": "メジャー",
       "minor": "マイナー",
       "patch": "パッチ",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "package.jsonのローカルバージョン{packageJsonVersion}は、最新のタグバージョン{latestTaggedGitVersion}とNPMバージョン{latestNpmVersion}よりも古いです。\n最新の変更を持っていますか？",
+      "npm-is-newer-than-local": "NPMバージョン{latestNpmVersion}は、ローカルバージョン{packageJsonVersion}よりも新しいです。\n最新の変更を持っていますか？",
     },
     "errors": {
       "no-diff": "コミットする変更がありません",
@@ -803,6 +814,8 @@ const Messages: Messages = {
       "major": "Основной",
       "minor": "Минорный",
       "patch": "Патч",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "Локальная версия package.json {packageJsonVersion} старше, чем последняя тегированная версия {latestTaggedGitVersion} и версия NPM {latestNpmVersion}.\nУ вас последние изменения?",
+      "npm-is-newer-than-local": "Версия NPM {latestNpmVersion} новее, чем локальная версия {packageJsonVersion}.\nУ вас последние изменения?",
     },
     "errors": {
       "no-diff": "Нет изменений для коммита",
@@ -950,6 +963,8 @@ const Messages: Messages = {
       "major": "Основний",
       "minor": "Мінорний",
       "patch": "Патч",
+      "latest-tagged-is-greater-than-local-but-npm-is-newer": "Локальна версія package.json {packageJsonVersion} старша за останню помічену версію {latestTaggedGitVersion} та версію NPM {latestNpmVersion}.\nУ вас останні зміни?",
+      "npm-is-newer-than-local": "Версія NPM {latestNpmVersion} новіша за локальну версію {packageJsonVersion}.\nУ вас останні зміни?",
     },
     "errors": {
       "no-diff": "Немає змін для коміту"

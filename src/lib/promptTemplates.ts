@@ -2,18 +2,14 @@ import { PromptTemplate } from "langchain/prompts";
 
 const combineSummaries = new PromptTemplate({
   inputVariables: ["summaries"],
-  template: `Combine the following summaries into a single summary. 
-  It should have a first line (no more than 50 chars) overall summary followed by bullets that expand on the summary. 
-  
-  Example Output:
-  Makes a change to the UI allowing the user to cancel running jobs
-  - refactored JobsList.tsx to use the new API
-  - added a new button to the UI
-  - added a new API endpoint to cancel jobs
-  - something else in the diffs
-  - etc.
+  template: `
+  -- instructions --
+  You are to combine a list of other summaries, into a single summary, while keeping all important information.
 
-  Do not remove any important information:
+  Your response MUST:
+  1. Contain a first line that is 50 or fewer characters.
+  2. Be followed by between 5 and 10 bulleted lines which give more detail on the summary.
+
   -- summaries --
   {summaries}
   
@@ -59,14 +55,7 @@ const reSummarizeDiff = new PromptTemplate({
   Focus on WHY the change was made, not WHAT the change was. Use your context of the code for the WHY, not general knowledge.
 
   Note: lines that start with a + were added, lines that start with a - were removed. Only use the + and - lines for the substance of the summary, while using the lines around for context.
-  
-  Example:
-  Makes a change to the UI allowing the user to cancel running jobs
-  - refactored JobsList.tsx to use the new API
-  - added a new button to the UI
-  - added a new API endpoint to cancel jobs
-
-
+ 
   -- diff --
   {diff}
   
@@ -223,20 +212,18 @@ const summarizeSummaries = new PromptTemplate({
 });
 
 const releaseNotes = new PromptTemplate({
-  inputVariables: ["summaries", "numberOfDiffs", "latest"],
+  inputVariables: ["summaries", "numberOfDiffs", "previous", "latest"],
   template: `These are summaries of {numberOfDiffs} diffs between product releases. 
     -- instructions -- 
     
     Purpose: 
-    Create awesome, exciting release notes of the change between the last release ({latest}) and now. Use GitHub flavored markdown.
+    Create awesome, exciting release notes of the change between the  last release ({previous}) and now ({latest}). Use GitHub flavored markdown.
 
     Focus on WHY the change was made, not WHAT the change was.
-    
-    Special Note: If functionality has changed, but the version in the package.json hasn't changed, return a header on the options: [CHECK PACKAGE VERSION]
 
     -- input content --
     {summaries}
-    
+    {previousCommitMessages}    
     -- example output --
     # Release notes for <new version>!
 

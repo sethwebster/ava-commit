@@ -15,23 +15,130 @@ import { input, select } from "@inquirer/prompts";
 import { exec } from "./spawn.js";
 import { fetchLatestNpmVersion } from "./environment.js";
 import Logger from "./logger.js";
+import { VersionInfo } from "../types.js";
+import { formatMessage } from "./formatMessage.js";
 
 var chalkAnimation: { rainbow: (text: string) => Animation; };
 (async function () {
   chalkAnimation = (await import("chalk-animation")).default;
 })();
 
-export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { verbose: false }) {
+type CreateReleaseNotesOptions = {
+  verbose?: boolean;
+}
+type ComparisonVersions = {
+  baseVersion: string;
+  currentVersion: string;
+}
+
+function evaluateVersions(versions: VersionInfo): { [key: string]: boolean } {
+  const { packageJsonVersion, latestTaggedGitVersion, latestNpmVersion } = versions;
+  return {
+    npmIsNewerThanLocal: compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
+    latestTaggedIsGreaterThanLocalButNpmIsNewer:
+      compareVersions(latestTaggedGitVersion ?? "0.0.0", packageJsonVersion) > 0 &&
+      compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
+    packageBumpNecessary:
+      compareVersions(packageJsonVersion, latestTaggedGitVersion ?? "0.0.0") <= 0 &&
+      compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") <= 0,
+    allVersionsAreEqual:
+      compareVersions(packageJsonVersion, latestTaggedGitVersion ?? "0.0.0") === 0 &&
+      compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") === 0,
+  };
+}
+
+export async function createReleaseNotes({
+  verbose,
+}: CreateReleaseNotesOptions = { verbose: false }) {
+  Logger.verbose("[createReleaseNotes] Creating release notes...");
   const config = loadConfig();
   if (!config.openAIApiKey) {
     await configure({});
     createReleaseNotes({});
     return;
   }
-  var { baseCompare, latest } = await resolveComparisonVersions();
-  Logger.log(`Generating release notes between ${chalk.yellow(baseCompare)} and ${chalk.yellow(latest)}...`)
 
-  const diffs = await git.diff({ baseCompare, compare: latest });
+  Logger.verbose("[createReleaseNotes] Fetching versions...");
+  const versions = await fetchVersions();
+  const versionComparisons = evaluateVersions(versions);
+  const comparisonVersions: ComparisonVersions = {
+    baseVersion: '0.0.0',
+    currentVersion: 'HEAD',
+  };
+
+  const {
+    npmIsNewerThanLocal,
+    latestTaggedIsGreaterThanLocalButNpmIsNewer,
+    packageBumpNecessary,
+    allVersionsAreEqual,
+  } = versionComparisons;
+
+  switch (true) {
+    case latestTaggedIsGreaterThanLocalButNpmIsNewer:
+      console.log(
+        formatMessage(MessagesForCurrentLanguage.messages["latest-tagged-is-greater-than-local-but-npm-is-newer"], {
+          latestTaggedGitVersion: chalk.yellow(versions.latestTaggedGitVersion ?? "0.0.0"),
+          latestNpmVersion: chalk.yellow(versions.latestNpmVersion ?? "0.0.0"),
+        })
+      );
+      console.log('Do you have the latest changes?');
+      process.exit(1);
+      break;
+    case npmIsNewerThanLocal:
+      console.log(
+        formatMessage(MessagesForCurrentLanguage.messages["npm-is-newer-than-local"], {
+          latestNpmVersion: chalk.yellow(versions.latestNpmVersion ?? "0.0.0"),
+          packageJsonVersion: chalk.yellow(versions.packageJsonVersion),
+        })
+      );
+      console.log('Do you have the latest changes?');
+      process.exit(1);
+      break;
+    case packageBumpNecessary:
+      if (
+        await resolveLocalPackageUpdate({
+          localPackageVersion: versions.packageJsonVersion,
+          remotePackageVersion: versions.latestTaggedGitVersion ?? "0.0.0",
+          npmPackageVersion: versions.latestNpmVersion ?? "0.0.0",
+        })
+      ) {
+        const latestVersion = packageJson.packageVersionFromProject() ?? '0.0.0';
+        if (compareVersions(versions.packageJsonVersion, latestVersion) > 0) {
+          comparisonVersions.currentVersion = latestVersion.startsWith('v') ? latestVersion : `v${latestVersion}`;
+        }
+      }
+    // fall-through intended
+    case allVersionsAreEqual:
+      comparisonVersions.baseVersion = versions.latestTaggedGitVersion ?? "0.0.0";
+      break;
+    default:
+      // Compare to latest version
+      comparisonVersions.baseVersion = versions.latestTaggedGitVersion ?? "0.0.0";
+      break;
+  }
+  await doCreateReleaseNotes({ verbose, ...comparisonVersions });
+}
+
+async function fetchVersions(): Promise<VersionInfo> {
+  const packageJsonVersion = packageJson.packageVersionFromProject() ?? "0.0.0";
+  const latestTaggedGitVersion = await getLatestTaggedGitVersion() ?? "0.0.0"
+  const latestNpmVersion = await fetchLatestNpmVersion();
+  const previousTaggedGitVersion = await getPreviousTaggedGitVersion(latestTaggedGitVersion ?? "");
+  return { packageJsonVersion, latestTaggedGitVersion, latestNpmVersion, previousTaggedGitVersion };
+}
+
+export async function doCreateReleaseNotes({ verbose, baseVersion, currentVersion }: CreateReleaseNotesOptions & ComparisonVersions = { verbose: false, baseVersion: '0.0.0', currentVersion: 'HEAD' }) {
+  const config = loadConfig();
+  if (!config.openAIApiKey) {
+    await configure({});
+    createReleaseNotes({});
+    return;
+  }
+
+  Logger.log(`Generating release notes between ${chalk.yellow(baseVersion)} and ${chalk.yellow(currentVersion)}...`)
+
+  const diffs = await git.diff({ baseCompare: baseVersion, compare: currentVersion });
+  const previousCommitMessages = await git.log({ baseCompare: baseVersion, compare: currentVersion });
   const summaries = await summarizeDiffs({ openAIApiKey: config.openAIApiKey, diffs, verbose });
   const rainbow = chalkAnimation.rainbow(MessagesForCurrentLanguage.messages['ava-is-working']);
   const model = new OpenAIChat({
@@ -50,7 +157,7 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   });
   const mappedSummaries = summaries.map((s, i) => `Diff ${i}: ${s}`).join("\n\n");
   let summaryText = "";
-  const summary = await chain.call({ summaries: mappedSummaries, numberOfDiffs: summaries.length, latest }, [
+  const summary = await chain.call({ summaries: mappedSummaries, previousCommitMessages, numberOfDiffs: summaries.length, previous: baseVersion, latest: currentVersion }, [
     {
       handleLLMNewToken: (token) => {
         summaryText += token;
@@ -62,95 +169,62 @@ export async function createReleaseNotes({ verbose }: { verbose?: boolean } = { 
   console.log(summary.text);
 }
 
-async function resolveComparisonVersions() {
-  let latest = await getLatestTaggedGitVersion();
-  if (latest) await resolveLocalPackageUpdate(latest);
-  if (!latest) {
-    latest = "HEAD";
-  }
-  let localPackageVersion = packageJson.packageVersionFromProject();
-  if (!localPackageVersion) {
-    localPackageVersion = "HEAD";
-  }
+async function resolveLocalPackageUpdate({ localPackageVersion, remotePackageVersion, npmPackageVersion }: { npmPackageVersion: string; localPackageVersion: string; remotePackageVersion: string }) {
+  // If the version on npm is less than the local or remote tagged version,
+  // there is no reason to update so lets return
+  console.log(`+++ NPM ${npmPackageVersion} +++ Local ${localPackageVersion} +++ Remote ${remotePackageVersion}`);
 
-  switch (true) {
-    case latest === "HEAD" && localPackageVersion === "HEAD":
-      console.log(`No versions to compare could be found. This is likely because you haven't set a package.json version. `)
-      process.exit(1);
-      break;
-    // More to come here
-  }
+  console.warn(
+    `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
+  );
 
-  let baseCompare = latest;
-  if (latest !== "HEAD" && compareVersions(localPackageVersion, latest!) === 0) {
-    // Versions are equal so we should use the previous version for the head 
-    // comparison
-    const npmVersion = await fetchLatestNpmVersion();
-    if (compareVersions(npmVersion, localPackageVersion) <= 0) {
-      console.log(`Local version and latest tag (${chalk.yellow(latest)}) are equal, but the published verison on NPM is ${chalk.yellowBright(npmVersion)}. We'll use the NPM version for comparison.`);
-      baseCompare = `v${npmVersion}`;
-    } else {
-      let previous = await getPreviousTaggedGitVersion(latest ?? "");
-      console.log(`Local version and latest tag are equal (${chalk.yellow(latest)}). Using previous version ${chalk.yellowBright(previous)} for comparison.`);
-      baseCompare = previous;
-    }
+  const userAnswer = await input({
+    message: MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].text, default:
+      MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].answers?.yes
+  });
+
+  const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"], userAnswer, "y");
+  if (answer === "y") {
+    const answer = await getPatchMinorMajor()
+    await executePatchMinorMajor(answer);
+    return true;
   }
-  return { baseCompare, latest };
+  return false;
 }
 
-async function resolveLocalPackageUpdate(latest: string) {
-  const localPackageVersion = packageJson.packageVersion();
-  if (compareVersions(latest, localPackageVersion) >= 0) {
-    const npmVersion = await fetchLatestNpmVersion();
-    // If the version on npm is less than the local or remote tagged version,
-    // there is no reason to update so lets return
-    console.log(`+++ NPM ${npmVersion} +++ Local ${localPackageVersion} +++ Remote  ${latest}`);
-
-    if (compareVersions(npmVersion, localPackageVersion) > 0) {
-      return;
+async function executePatchMinorMajor(answer: string) {
+  try {
+    switch (answer) {
+      case "patch":
+        await exec("npm version patch -m 'chore: Bump package version %s'");
+        break;
+      case "minor":
+        await exec("npm version minor -m 'chore: Bump package version %s'");
+        break;
+      case "major":
+        await exec("npm version major -m 'chore: Bump package version %s'");
+        break;
     }
-    console.warn(
-      `⚠️  ${chalk.yellow(MessagesForCurrentLanguage.messages['update-package-version'])}`
-    );
-
-    const userAnswer = await input({
-      message: MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].text, default:
-        MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"].answers?.yes
-    });
-
-    const answer = convertAnswerToDefault(MessagesForCurrentLanguage.prompts["offer-automatic-package-bump"], userAnswer, "y");
-    if (answer === "y") {
-      const answer = await select({
-        message: MessagesForCurrentLanguage.messages["select-version-update-type"],
-        choices: [
-          { name: MessagesForCurrentLanguage.messages["patch"], value: "patch" },
-          { name: MessagesForCurrentLanguage.messages["minor"], value: "minor" },
-          { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
-        ]
-      })
-      try {
-        switch (answer) {
-          case "patch":
-            await exec("npm version patch -m 'chore: Bump package version %s'");
-            break;
-          case "minor":
-            await exec("npm version minor -m 'chore: Bump package version %s'");
-            break;
-          case "major":
-            await exec("npm version major -m 'chore: Bump package version %s'");
-            break;
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          if (e.message.includes("Git working directory not clean")) {
-            console.log(`Git working directory not clean. Aborting package version bump. Run \`ava-commit generate\` to generate a commit and try again.`);
-            process.exit(1);
-          }
-        }
-        throw e;
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message.includes("Git working directory not clean")) {
+        console.log(`Git working directory not clean. Aborting package version bump. Run \`ava-commit generate\` to generate a commit and try again.`);
+        process.exit(1);
       }
     }
+    throw e;
   }
+}
+
+async function getPatchMinorMajor() {
+  return await select({
+    message: MessagesForCurrentLanguage.messages["select-version-update-type"],
+    choices: [
+      { name: MessagesForCurrentLanguage.messages["patch"], value: "patch" },
+      { name: MessagesForCurrentLanguage.messages["minor"], value: "minor" },
+      { name: MessagesForCurrentLanguage.messages["major"], value: "major" },
+    ]
+  });
 }
 
 async function getPreviousTaggedGitVersion(latest: string) {

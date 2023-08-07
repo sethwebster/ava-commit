@@ -8,6 +8,7 @@ import git from "./git.js";
 import Logger from "./logger.js";
 import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.js";
 import { ChoicesType, GenerateOptions, GenerateStatusWithContext } from "../types.js";
+import { getConsoleSize } from "./consoleUtils.js";
 
 export default async function generate(options: GenerateOptions) {
   Logger.verbose("Generate is starting...")
@@ -112,15 +113,20 @@ async function handleCombine(context: GenerateStatusWithContext, options: Genera
   const { commitMessages, diffs, openAIApiKey } = context;
   const { length } = options;
   const choices = commitMessages.map((s, i) => ({ name: `${i + 1}. ${s}`, value: i + 1 }));
-  let numbers: number[] = [];
+  let numbers: (number | string)[] = [];
+  const { rows } = getConsoleSize();
+  const totalLinesInCommitMessages = commitMessages.map(s => s.split("\n").length).reduce((a, b) => a + b, 0);
+  const pageSize = Math.min(rows - 2, Math.max(20, totalLinesInCommitMessages));
+
   if (choices.length > 2) {
-    numbers = await checkbox<number>({
+    numbers = await checkbox<number | string>({
       message: MessagesForCurrentLanguage.prompts["combine-summaries-selection"].text,
       choices: [
-        { name: "0. Back", value: 0 },
+        { name: "-. Back", value: 0 },
+        { name: "A. All", value: "A" },
         ...choices,
       ],
-      pageSize: 20
+      pageSize
     });
   } else {
     numbers = [1, 2]
@@ -128,9 +134,17 @@ async function handleCombine(context: GenerateStatusWithContext, options: Genera
   if (numbers.length === 0 || numbers[0] === 0) {
     return { ...context, status: "continue" };
   }
-  const combined = numbers.map(n => commitMessages[n - 1]);
-  const resummarized = await combineSummaries({ openAIApiKey, summaries: combined, maxLength: length });
-  console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
+
+  let combined: string[] = [];
+  const allSelected = !!(numbers.find(val => val === "A"))
+  if (allSelected) {
+    combined = commitMessages;
+  } else {
+    const numbersFixed = numbers.map(n => parseInt(n.toString()));
+    combined = numbersFixed.map(n => commitMessages[n - 1]);
+  }
+  const resummarized = await combineSummaries({ openAIApiKey, summaries: combined, maxLength: length, verbose: options.verbose });
+  // console.log(MessagesForCurrentLanguage.messages["summaries-combined-confirmation"] + "\n", resummarized);
   return await getUserResponseToMessages({ status: "continue", diffs, summaries: combined, commitMessages: [resummarized], openAIApiKey }, options);
 }
 
@@ -164,16 +178,20 @@ async function summariesRouter(answer: string, context: GenerateStatusWithContex
 async function getUserResponseToMessages(statusWithContext: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {
   const { commitMessages } = statusWithContext;
   let status: GenerateStatusWithContext = { ...statusWithContext, status: "continue" }
+  const totalLinesInCommitMessages = commitMessages.map(s => s.split("\n").length).reduce((a, b) => a + b, 0);
+  const { rows } = getConsoleSize();
   while (status.status === "continue") {
     const choices = await generateChoices(commitMessages);
     const key = choices.length > 1 ? "accept-summary-selection" : "accept-summary-single";
+    const pageSize = Math.min(rows - 2, Math.max(20, totalLinesInCommitMessages));
+
     const promptOptions = {
       message: MessagesForCurrentLanguage.prompts[key].text,
       choices: [
         { name: "<", value: "n" },
         ...choices,
       ],
-      pageSize: 20,
+      pageSize,
     }
     const userAnswer = await select<string | number>(promptOptions);
 

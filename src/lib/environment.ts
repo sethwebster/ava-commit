@@ -1,5 +1,4 @@
 import fs from 'fs';
-import packageJson from './packageJson.js';
 import chalk from 'chalk';
 import boxen, { Options } from 'boxen';
 import { compareVersions } from 'compare-versions';
@@ -8,6 +7,7 @@ import { promiseWithTimeout } from './promiseWithTimeout.js';
 import MessagesForCurrentLanguage from './messages.js';
 import { input } from '@inquirer/prompts';
 import Logger from './logger.js';
+import packageJson from './packageJson.js';
 
 export function makeAvaHomePath() {
   return `${process.env.HOME}/.ava-commit`;
@@ -47,21 +47,28 @@ async function checkForLatestVersionSafeWithTimeout(timeout: number): Promise<Up
   } catch (e) {
     // Swallow the error
     Logger.verbose("Error checking for latest version: ", e);
-    return { currentVersion: packageJson.packageVersion(), latestNpmVersion: packageJson.packageVersion(), updateAvailable: false };
+    return { currentVersion: (packageJson.packageVersion() ?? "0.0.0"), latestNpmVersion: packageJson.packageVersion() ?? "0.0.0", updateAvailable: false };
   }
 }
 
 async function checkForLatestVersion(): Promise<UpdatePayload> {
-  const currentVersion = packageJson.packageVersion();
+  const currentVersion = packageJson.packageVersion() ?? "0.0.0";
   const latestNpmVersion = await fetchLatestNpmVersion();
   const versionComparison = compareVersions(currentVersion, latestNpmVersion);
   return { currentVersion, latestNpmVersion, updateAvailable: versionComparison === -1 };
 }
 
 export async function fetchLatestNpmVersion() {
-  const response = await fetch(`https://registry.npmjs.org/@sethwebster/ava-commit/latest`);
+  Logger.verbose("Fetching latest npm version...")
+  const packageJsonData = await packageJson.loadPackageJson();
+  const { name } = packageJsonData;
+  if (!name) {
+    throw new Error("Failed to fetch latest npm version. No name in package.json");
+  }
+  const response = await fetch(`https://registry.npmjs.org/${name}/latest`);
   const json = await response.json();
   const latestVersion = json.version;
+  Logger.verbose(`Latest npmjs.org version for ${name} is ${latestVersion}`)
   return latestVersion;
 }
 

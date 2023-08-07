@@ -16,7 +16,7 @@ async function start() {
   Logger.setVerbose(verbose);
   await checkForLatestVersionAndNotify();
   const program = new Command();
-  program.version(packageJson.packageVersion(), "-V,--version", MessagesForCurrentLanguage.messages["display-version-information"])
+  program.version(packageJson.packageVersion() ?? "0.0.0", "-V,--version", MessagesForCurrentLanguage.messages["display-version-information"])
     .description(MessagesForCurrentLanguage.messages.description)
     .name('ava-commit')
     .addCommand(new Command("update").description(MessagesForCurrentLanguage.messages["update-command-description"])
