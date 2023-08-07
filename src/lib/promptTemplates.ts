@@ -212,7 +212,7 @@ const summarizeSummaries = new PromptTemplate({
 });
 
 const releaseNotes = new PromptTemplate({
-  inputVariables: ["summaries", "numberOfDiffs", "previous", "latest"],
+  inputVariables: ["summaries", "numberOfDiffs", "previous", "latest", "previousCommitMessages"],
   template: `These are summaries of {numberOfDiffs} diffs between product releases. 
     -- instructions -- 
     
@@ -220,6 +220,8 @@ const releaseNotes = new PromptTemplate({
     Create awesome, exciting release notes of the change between the  last release ({previous}) and now ({latest}). Use GitHub flavored markdown.
 
     Focus on WHY the change was made, not WHAT the change was.
+
+    Work to deduplicate the lines and make sure there is no redundancy.
 
     -- input content --
     {summaries}

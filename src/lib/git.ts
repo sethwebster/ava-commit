@@ -46,7 +46,7 @@ async function diff(options?: DiffOptions) {
 
 async function log({ baseCompare, compare }: Omit<DiffOptions, "staged">) {
   try {
-    const logResult = spawn("git", ["log", "--pretty=%B", baseCompare ?? "", compare ?? "HEAD"]);
+    const logResult = spawn("git", ["log", "--pretty=%B", `${baseCompare}..${compare}`]);
     const lines = (logResult ?? "").split("\n").filter(l => l.trim().length > 0);
     return lines;
   } catch (e) {
