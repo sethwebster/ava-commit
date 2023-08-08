@@ -67,6 +67,9 @@ export async function fetchLatestNpmVersion() {
   }
   const response = await fetch(`https://registry.npmjs.org/${name}/latest`);
   const json = await response.json();
+  if (json === "Not Found") {
+    return "-1.-1.-1";
+  }
   const latestVersion = json.version;
   Logger.verbose(`Latest npmjs.org version for ${name} is ${latestVersion}`)
   return latestVersion;

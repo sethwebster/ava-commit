@@ -33,17 +33,19 @@ type ComparisonVersions = {
 
 function evaluateVersions(versions: VersionInfo): { [key: string]: boolean } {
   const { packageJsonVersion, latestTaggedGitVersion, latestNpmVersion } = versions;
+  const npmPackageNotFound = latestNpmVersion === "-1.-1.-1";
   return {
-    npmIsNewerThanLocal: compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
+    npmIsNewerThanLocal: npmPackageNotFound ? false : compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
+    localIsNewerThanNpm: compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") > 0,
     latestTaggedIsGreaterThanLocalButNpmIsNewer:
       compareVersions(latestTaggedGitVersion ?? "0.0.0", packageJsonVersion) > 0 &&
-      compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
+      npmPackageNotFound ? false : compareVersions(latestNpmVersion ?? "0.0.0", packageJsonVersion) > 0,
     packageBumpNecessary:
       compareVersions(packageJsonVersion, latestTaggedGitVersion ?? "0.0.0") <= 0 &&
-      compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") <= 0,
+      npmPackageNotFound ? false :compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") <= 0,
     allVersionsAreEqual:
       compareVersions(packageJsonVersion, latestTaggedGitVersion ?? "0.0.0") === 0 &&
-      compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") === 0,
+      npmPackageNotFound ? false : compareVersions(packageJsonVersion, latestNpmVersion ?? "0.0.0") === 0,
   };
 }
 
@@ -71,6 +73,7 @@ export async function createReleaseNotes({
     latestTaggedIsGreaterThanLocalButNpmIsNewer,
     packageBumpNecessary,
     allVersionsAreEqual,
+    localIsNewerThanNpm,
   } = versionComparisons;
 
   switch (true) {
@@ -110,6 +113,9 @@ export async function createReleaseNotes({
     // fall-through intended
     case allVersionsAreEqual:
       comparisonVersions.baseVersion = versions.latestTaggedGitVersion ?? "0.0.0";
+      break;
+    case localIsNewerThanNpm:
+      comparisonVersions.baseVersion = `v${versions.latestNpmVersion ?? "0.0.0"}`;
       break;
     default:
       // Compare to latest version
