@@ -31,7 +31,8 @@ async function start() {
       .option("-a, --all", MessagesForCurrentLanguage.messages["option-all-description"], false)
       .option('-v, --verbose', MessagesForCurrentLanguage.messages["option-verbose-description"], false)
       .option("-p, --push", MessagesForCurrentLanguage.messages["option-push-description"], false)
-      .option<number>('-l,--length [number]', MessagesForCurrentLanguage.messages["option-length-description"], (val, prev) => {
+      .option("--ignore [file...]", "Ignore diffs to file")
+      .option<number>('-l,--length <number>', MessagesForCurrentLanguage.messages["option-length-description"], (val, prev) => {
         return parseInt(val);
       }, 80)
       // .option("--release-notes", "Generate release notes as well", false)
@@ -41,8 +42,6 @@ async function start() {
       .addHelpText('after', MessagesForCurrentLanguage.messages["example-2"])
       .addHelpText('after', MessagesForCurrentLanguage.messages["example-3"])
       .action((options) => {
-        
-        Logger.verbose("Generate Options", options)
         generate(options);
       })
     )

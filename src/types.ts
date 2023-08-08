@@ -462,6 +462,10 @@ export interface GenerateOptions {
   releaseNotes: boolean;
   noCache?: boolean;
   push?: boolean;
+  /**
+   * list of patterns supplied to ignore
+   */
+  ignore?: string[];
 }
 
 export type Choice<Value> = {

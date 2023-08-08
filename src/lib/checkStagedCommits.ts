@@ -32,7 +32,6 @@ export default async function checkStagedCommits(options: { all: boolean } = { a
 function checkForStagedCommits() {
   try {
     const status = git.status({ short: true });
-    Logger.verbose("Status: ", status)
     return status;
   } catch (e) {
     if (e instanceof Error) {

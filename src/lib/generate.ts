@@ -4,14 +4,18 @@ import { Separator, checkbox, select, input } from "@inquirer/prompts";
 import cache from "./cache.js";
 import chalk from "chalk";
 import checkStagedCommits from "./checkStagedCommits.js";
-import git from "./git.js";
+import git, { parseDiff } from "./git.js";
 import Logger from "./logger.js";
 import MessagesForCurrentLanguage, { convertAnswerToDefault } from "./messages.js";
 import { ChoicesType, GenerateOptions, GenerateStatusWithContext } from "../types.js";
 import { getConsoleSize } from "./consoleUtils.js";
+import * as mm from 'micromatch';
+
+const micromatch = mm.default;
 
 export default async function generate(options: GenerateOptions) {
   Logger.verbose("Generate is starting...")
+  Logger.verbose("Generate Options", options)
   let existingConfig = loadConfig();
   const envOpenAiKey = process.env.OPENAI_API_KEY ?? undefined;
   let openAIApiKey = envOpenAiKey ?? existingConfig.openAIApiKey;
@@ -38,14 +42,18 @@ export default async function generate(options: GenerateOptions) {
 }
 
 async function doGenerate(options: GenerateOptions & { openAIApiKey: string }): Promise<GenerateStatusWithContext> {
-  const { openAIApiKey, verbose, length, releaseNotes, noCache } = options;
+  const { openAIApiKey, verbose, length, releaseNotes, noCache, ignore } = options;
 
   try {
     let summaries: string[];
     let commitMessages: string[];
     await checkStagedCommits();
-    const diffs = await git.diff();
+    let diffs = await git.diff();
+    diffs = filterIgnoredDiffs(ignore, diffs);
     const previousSummaryRun = cache.getPreviousRun(diffs);
+    console.log()
+
+    Logger.verbose("Diffs: ", diffs);
 
     if (previousSummaryRun && !noCache) {
       console.log(chalk.green(MessagesForCurrentLanguage.messages["using-cached-summaries"]));
@@ -64,6 +72,23 @@ async function doGenerate(options: GenerateOptions & { openAIApiKey: string }): 
     // Should probably log this using some telemetry
     return { status: "error", diffs: [], summaries: [], commitMessages: [], openAIApiKey };
   }
+}
+
+function filterIgnoredDiffs(ignore: string[] | undefined, diffs: string[]) {
+  if (ignore && ignore.length > 0) {
+    diffs = diffs.filter((diff, i) => {
+      const isMatch = ignore.some(pattern => {
+        const fileName = parseDiff(diff).file!;
+        const match = micromatch.isMatch(fileName, pattern);
+        if (match) {
+          Logger.verbose(`Excluding ${fileName} because it matches ${pattern}`);
+        }
+        return match;
+      });
+      return !isMatch;
+    });
+  }
+  return diffs;
 }
 
 async function doRegenerate(hint: string, context: GenerateStatusWithContext, options: GenerateOptions): Promise<GenerateStatusWithContext> {

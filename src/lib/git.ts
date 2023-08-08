@@ -39,9 +39,20 @@ async function diff(options?: DiffOptions) {
       }
     }
     const diffResult = spawn("git", args) ?? "";
-    const splits = diffResult.split("diff --git");
+    const splits = diffResult.split(/^diff --git/gm).filter(l => l.trim().length > 0).map(l => `diff --git${l}`)
     return resolve(splits);
   });
+}
+
+export function parseDiff(diff: string) {
+  const lines = diff.split("\n");
+  const header = lines[0];
+  const file = header.split(" ")[2].split("/").pop();
+  const index = lines[1];
+  return {
+    file,
+    index    
+  }
 }
 
 async function log({ baseCompare, compare }: Omit<DiffOptions, "staged">) {

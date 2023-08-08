@@ -98,7 +98,8 @@ async function summarizeDiff(options: SummarizeDiffOptions): Promise<string> {
 
 export async function summarizeDiffs(options: SummarizeDiffsOptions) {
   const { openAIApiKey, diffs, verbose } = options;
-  const filtered = diffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
+  const filtered = diffs.map(d=>d.trim()).filter(d=>d.length>0)
+  ;//ddiffs.filter(d => !d.startsWith("diff --git") && d.trim().length > 0);
   process.stdout.write(`${MessagesForCurrentLanguage.messages.summarizing} ${chalk.bold(chalk.yellow(filtered.length))} ${MessagesForCurrentLanguage.messages.diffs}`);
   const summaryPromises = filtered.map(diff => summarizeDiff({ openAIApiKey, diff, verbose }));
   const summaries = await Promise.all(summaryPromises);

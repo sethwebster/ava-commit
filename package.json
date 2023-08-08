@@ -13,7 +13,7 @@
   },
   "scripts": {
     "dev": "tsc -w",
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --dts --minify --clean --sourcemap --legacy-output --target node14 --out-dir dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
@@ -38,11 +38,14 @@
     "compare-versions": "^6.0.0",
     "figlet": "^1.6.0",
     "langchain": "^0.0.120",
+    "micromatch": "^4.0.5",
     "package-json-type": "^1.0.3"
   },
   "devDependencies": {
     "@types/chalk-animation": "^1.6.1",
+    "@types/micromatch": "^4.0.2",
     "@types/node": "^20.4.5",
+    "tsup": "^7.2.0",
     "typescript": "^5.1.6"
   }
 }
